@@ -61,6 +61,12 @@ export default function SubscribePage() {
   const name = firstName(account);
   const weeks = saved?.plan?.weeks.length;
 
+  const [failed, setFailed] = useState(false);
+  async function act(on: boolean) {
+    setFailed(false);
+    if (!(await setSubscribed(on))) setFailed(true);
+  }
+
   const close = () => (window.history.length > 1 ? router.back() : router.push("/today"));
 
   return (
@@ -100,12 +106,17 @@ export default function SubscribePage() {
               </div>
             </div>
             <p className="mt-3 text-center text-xs text-muted">Demo mode: no payment was taken in this prototype.</p>
+            {failed && (
+              <p role="alert" className="mt-2 text-center text-sm text-vo2">
+                We could not save that. Try again.
+              </p>
+            )}
 
             <div className="mt-auto sticky bottom-0 -mx-5 bg-void px-5 pb-[calc(1rem+env(safe-area-inset-bottom))] space-y-3 pt-4">
               <Link href="/plan" className="flex h-14 w-full items-center justify-center rounded-full text-lg font-bold text-void" style={{ background: TEAL }}>
                 Back to my plan
               </Link>
-              <button type="button" onClick={() => setSubscribed(false)} className="h-11 w-full text-sm font-bold text-subtext hover:text-ink">
+              <button type="button" onClick={() => void act(false)} className="h-11 w-full text-sm font-bold text-subtext hover:text-ink">
                 Cancel subscription
               </button>
             </div>
@@ -133,7 +144,7 @@ export default function SubscribePage() {
               <button
                 type="button"
                 onClick={() => {
-                  if (choice === "annual") setSubscribed(true);
+                  if (choice === "annual") void act(true);
                   else close();
                 }}
                 className="flex h-14 w-full items-center justify-center rounded-full text-lg font-bold text-void transition active:scale-[0.99]"
@@ -141,7 +152,12 @@ export default function SubscribePage() {
               >
                 {choice === "annual" ? "Start now" : "Stay on the free plan"}
               </button>
-              <p className="mt-3 text-center text-sm text-muted">Demo mode: no payment is taken in this prototype.</p>
+              {failed && (
+              <p role="alert" className="mt-2 text-center text-sm text-vo2">
+                We could not save that. Try again.
+              </p>
+            )}
+            <p className="mt-3 text-center text-sm text-muted">Demo mode: no payment is taken in this prototype.</p>
             </div>
           </>
         )}

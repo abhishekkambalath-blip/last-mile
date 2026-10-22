@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import BottomTabs from "@/components/BottomTabs";
 import RouteSvg, { type LatLng } from "@/components/RouteSvg";
 import { addPoint, formatDuration, formatPace, newTrack, simplifyRoute, type Track } from "@/lib/gps";
+import { adaptAfterRun, type AdaptResult } from "@/lib/adaptClient";
 import { saveRun, useRuns, type Run } from "@/lib/runs";
 
 // Leaflet needs the browser, so the map is loaded on the client only.
@@ -37,6 +38,7 @@ export default function RunPage() {
   const [distanceM, setDistanceM] = useState(0);
   const [elapsed, setElapsed] = useState(0);
   const [draft, setDraft] = useState<Run | null>(null);
+  const [adapt, setAdapt] = useState<AdaptResult | null>(null);
   const [route, setRoute] = useState<LatLng[]>([]);
   const [loc, setLoc] = useState<LocState>({ status: "checking" });
   const runs = useRuns();
@@ -253,7 +255,9 @@ export default function RunPage() {
     };
     saveRun(run);
     setDraft(run);
+    setAdapt(null);
     setPhase("saved");
+    void adaptAfterRun().then(setAdapt);
   }
 
   const reset = () => {
@@ -482,6 +486,12 @@ export default function RunPage() {
             <p className="text-subtext">
               {draft.distanceKm} km in {formatDuration(draft.durationSec)}. Nice work.
             </p>
+            {adapt && (
+              <p className={`rounded-md p-3 text-left text-sm ${adapt.changed || adapt.held ? "bg-carbon text-ink" : "text-subtext"}`}>
+                <strong className="block text-xs uppercase tracking-wider text-muted">Your plan</strong>
+                {adapt.message}
+              </p>
+            )}
             <button onClick={reset} className="w-full rounded-md bg-volt py-3 font-athletic text-base font-semibold uppercase tracking-widest text-void hover:brightness-110">
               Done
             </button>

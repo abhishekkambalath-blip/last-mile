@@ -47,6 +47,7 @@ export type Plan = {
   source: "claude" | "fallback";
   totalWeeks?: number; // weeks from the start of week 1 to race week
   aiWeeks?: number; // how many weeks were written by the AI; the rest were written by rules
+  adaptedFor?: string[]; // ids of runs the plan has already been eased for
 };
 
 export const RACE_KM: Record<Profile["distance"], number> = { "5K": 5, "10K": 10, "21K": 21.1, Marathon: 42.2 };

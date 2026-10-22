@@ -1,8 +1,9 @@
 "use client";
 
 import { useMemo, useSyncExternalStore } from "react";
+import { pushAthleteSoon } from "@/lib/sync";
 
-/** The runner's profile details. Kept in this browser only, like the plan and the recorded runs. */
+/** The runner's profile details. Kept in this browser and, when the backend is on, saved to Supabase too. */
 export type Account = { name: string; email: string; dob: string; gender: string; injury: string };
 
 export const EMPTY_ACCOUNT: Account = { name: "", email: "", dob: "", gender: "", injury: "" };
@@ -32,6 +33,7 @@ export function saveAccount(patch: Partial<Account>) {
     localStorage.setItem(KEY, JSON.stringify({ ...parse(read()), ...patch }));
   } catch {}
   window.dispatchEvent(new Event(EVENT));
+  pushAthleteSoon();
 }
 
 function subscribe(cb: () => void) {

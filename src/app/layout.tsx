@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Figtree } from "next/font/google";
 import AppHeader from "@/components/AppHeader";
+import SyncStarter from "@/components/SyncStarter";
 import "./globals.css";
 
 const figtree = Figtree({ variable: "--font-figtree", subsets: ["latin"] });
@@ -14,6 +15,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${figtree.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col bg-void text-ink">
+        <SyncStarter />
         <AppHeader />
         {children}
       </body>

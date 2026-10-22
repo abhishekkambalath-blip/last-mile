@@ -2,6 +2,7 @@
 
 import { useMemo, useSyncExternalStore } from "react";
 import { PLAN_STORAGE_KEY, type Plan, type Profile } from "@/lib/plan";
+import { pushAthleteSoon } from "@/lib/sync";
 
 // createdAt is when the plan was built; it decides which calendar week is week 1.
 export type Saved = { profile: Profile; plan: Plan | null; createdAt?: string };
@@ -32,6 +33,7 @@ export function writeSaved(saved: Saved | null) {
     else localStorage.removeItem(PLAN_STORAGE_KEY);
   } catch {}
   window.dispatchEvent(new Event(EVENT));
+  pushAthleteSoon();
 }
 
 /** The runner's answers and plan from this browser. `ready` is false during server render. */

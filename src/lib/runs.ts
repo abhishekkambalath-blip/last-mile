@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useSyncExternalStore } from "react";
+import { pushRun } from "@/lib/sync";
 
 export type CheckIn = { effort: number; feeling: string };
 
@@ -19,10 +20,7 @@ export type Run = {
 const KEY = "last-mile:runs";
 const EVENT = "last-mile:runs-changed";
 
-/**
- * Storage for the prototype lives in this browser. Feature 3 needs a shared athlete
- * database (e.g. Supabase); swap these two functions and nothing else has to change.
- */
+/** Runs are read from this browser. When the backend is on, they are also saved to Supabase and pulled back in on start-up. */
 export function loadRuns(): Run[] {
   try {
     return JSON.parse(localStorage.getItem(KEY) ?? "[]");
@@ -38,6 +36,7 @@ export function saveRun(run: Run) {
     localStorage.setItem(KEY, JSON.stringify(runs));
   } catch {}
   window.dispatchEvent(new Event(EVENT));
+  void pushRun(run);
 }
 
 function subscribe(cb: () => void) {
