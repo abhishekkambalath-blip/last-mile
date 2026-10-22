@@ -9,7 +9,7 @@
 
 Without these keys the app keeps working from browser storage only.
 
-## Fitness bands (Profile > Connected devices)
+## Fitness bands (profile menu > Connect devices)
 
 Needs the Supabase setup above, plus:
 

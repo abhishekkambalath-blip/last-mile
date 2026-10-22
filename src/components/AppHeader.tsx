@@ -44,8 +44,8 @@ export default function AppHeader() {
     router.push("/plan"); // with no plan saved, the Plan tab shows the plan form
   }
 
-  // The profile and subscription pages have their own top bar.
-  if (path === "/profile" || path === "/subscribe") return null;
+  // The profile, subscription and devices pages have their own top bar.
+  if (path === "/profile" || path === "/subscribe" || path === "/devices") return null;
 
   const itemCls = "flex min-h-11 w-full items-center gap-3 px-4 py-3 text-left text-sm font-semibold text-ink hover:bg-white/5";
   const iconCls = "h-5 w-5 text-subtext";
@@ -81,6 +81,13 @@ export default function AppHeader() {
                   </svg>
                   <span className="flex-1">Subscription</span>
                   <span className={`rounded-full px-2 py-0.5 text-[11px] font-extrabold ${subscribed ? "bg-[#2ac4bd] text-void" : "bg-white/10 text-subtext"}`}>{subscribed ? "ACTIVE" : "FREE"}</span>
+                </Link>
+                <Link role="menuitem" href="/devices" onClick={() => setMenuOpen(false)} className={itemCls}>
+                  <svg {...svg} className={iconCls}>
+                    <rect x="7" y="2" width="10" height="20" rx="3" />
+                    <path d="M10 6h4M12 18h.01" />
+                  </svg>
+                  <span className="flex-1">Connect devices</span>
                 </Link>
                 <button
                   role="menuitem"

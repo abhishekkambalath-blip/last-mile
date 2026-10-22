@@ -11,7 +11,7 @@ export async function GET(req: Request, ctx: RouteContext<"/api/devices/[provide
   const { provider: id } = await ctx.params;
   const url = new URL(req.url);
   const home = appBase(req);
-  const back = (q: string) => Response.redirect(`${home}/profile?${q}`, 302);
+  const back = (q: string) => Response.redirect(`${home}/devices?${q}`, 302);
 
   const provider = providerOf(id);
   const db = adminClient();

@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useState, type ReactNode } from "react";
-import ConnectedDevices from "@/components/ConnectedDevices";
 import { PriceBadge } from "@/components/PriceBadge";
 import RunnerIcon from "@/components/RunnerIcon";
 import { saveAccount, useAccount, type Account } from "@/lib/account";
@@ -194,8 +193,6 @@ export default function ProfilePage() {
             <p className="text-xs text-subtext">When you build a plan, this is filled in for you as your injury note.</p>
           </Editor>
         </Row>
-
-        <ConnectedDevices />
 
         <p className="mt-6 text-center text-xs text-muted">Your details are saved on this device only.</p>
       </main>
