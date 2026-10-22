@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Onboarding form designs</title>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0}
+body{background:#14171d;color:#fff;font:16px/1.5 Figtree,system-ui,sans-serif;padding:36px 20px 80px}
+.w{max-width:1100px;margin:0 auto}
+a.back{color:#9aa3b2;text-decoration:none;font-size:14px;font-weight:600}
+h1{font-size:34px;font-weight:800;letter-spacing:-.02em;margin-top:8px}
+.s{color:#9aa3b2;margin:6px 0 30px;max-width:60ch}
+.g{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:22px}
+a.c{display:block;text-decoration:none;color:inherit;background:#262b35;border-radius:24px;padding:16px;transition:.25s}
+a.c:hover{transform:translateY(-4px);box-shadow:0 18px 40px rgba(0,0,0,.45)}
+.ph{width:214px;height:464px;margin:0 auto 14px;border-radius:26px;overflow:hidden;position:relative;background:#14171d;border:3px solid #0d0f13}
+.ph iframe{width:390px;height:844px;border:0;transform:scale(.55);transform-origin:0 0;pointer-events:none;position:absolute;left:0;top:0}
+.t{display:flex;align-items:center;gap:8px}.t b{font-size:19px;font-weight:800}
+.tag{font-size:11px;font-weight:700;border-radius:99px;padding:2px 9px;color:#fff}
+p.d{color:#9aa3b2;font-size:14px;margin-top:4px}
+</style>
+</head>
+<body>
+<div class="w">
+  <a class="back" href="../index.html">← All prototypes</a>
+  <h1>Onboarding form designs</h1>
+  <p class="s">Four ways to ask the same five questions: goal, race date, goal pace, running history and injury. Open one full size to try it. Nothing here builds a real plan.</p>
+  <div class="g">
+    <a class="c" href="wizard.html"><div class="ph"><iframe src="wizard.html" loading="lazy" title="Step by step"></iframe></div>
+      <div class="t"><b>1 · Step by step</b><span class="tag" style="background:#2f7bff">One question a screen</span></div>
+      <p class="d">A colored progress bar, one big question at a time, and a summary before you build. Calm and focused, best for first-timers.</p></a>
+    <a class="c" href="cards.html"><div class="ph"><iframe src="cards.html" loading="lazy" title="Big cards"></iframe></div>
+      <div class="t"><b>2 · Big cards</b><span class="tag" style="background:#f97316">One page</span></div>
+      <p class="d">Race goals as large gradient tiles, a segmented level picker, and a sticky Build button that sums up your answers.</p></a>
+    <a class="c" href="chat.html"><div class="ph"><iframe src="chat.html" loading="lazy" title="Coach chat"></iframe></div>
+      <div class="t"><b>3 · Coach chat</b><span class="tag" style="background:#58b91e">Conversation</span></div>
+      <p class="d">A coach asks, you tap or type. Friendly and quick, and the form never feels like a form.</p></a>
+    <a class="c" href="sentence.html"><div class="ph"><iframe src="sentence.html" loading="lazy" title="Fill the sentence"></iframe></div>
+      <div class="t"><b>4 · Fill the sentence</b><span class="tag" style="background:#a070dc">Playful</span></div>
+      <p class="d">One big sentence with colored blanks, and a live plan preview underneath that grows as you fill it in.</p></a>
+    <a class="c" href="/plan"><div class="ph"><iframe src="/plan" loading="lazy" title="Current"></iframe></div>
+      <div class="t"><b>Now in the app</b><span class="tag" style="background:#5e6778">Plan tab</span></div>
+      <p class="d">The app now uses a light, soft form in the Plan tab. These four are earlier options.</p></a>
+  </div>
+</div>
+</body>
+</html>

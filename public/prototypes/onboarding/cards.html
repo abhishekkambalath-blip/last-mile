@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Onboarding · Big cards</title>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--void:#14171d;--card:#262b35;--carbon:#1d2129;--sub:#9aa3b2;--muted:#6f7888;--line:rgba(255,255,255,.08)}
+*{box-sizing:border-box;margin:0}
+body{background:var(--void);color:#fff;font:16px/1.5 Figtree,system-ui,sans-serif;padding-bottom:120px}
+.bar{background:var(--card);height:64px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;letter-spacing:-.02em}
+main{max-width:720px;margin:0 auto;padding:20px 16px;display:flex;flex-direction:column;gap:26px}
+h1{font-size:34px;line-height:1.1;font-weight:800;letter-spacing:-.02em}
+.lede{color:var(--sub);margin-top:6px}
+h2{font-size:20px;font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+h2 em{font:700 12px Figtree;color:#ef4444;font-style:normal}
+.goals{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+@media(min-width:560px){.goals{grid-template-columns:repeat(3,1fr)}}
+.g{position:relative;overflow:hidden;border:0;border-radius:24px;height:132px;padding:16px;color:#fff;text-align:left;cursor:pointer;font:inherit;transition:.25s;opacity:.85}
+.g:hover{opacity:1;transform:translateY(-2px)}
+.g.sel{opacity:1;transform:scale(1.03);box-shadow:0 0 0 3px #fff,0 14px 30px rgba(0,0,0,.45)}
+.g .big{position:absolute;left:16px;bottom:34px;font-size:40px;font-weight:800;letter-spacing:-.03em;line-height:1}
+.g .km{position:absolute;left:16px;bottom:14px;font-size:13px;font-weight:600;opacity:.85}
+.g svg{position:absolute;right:-8px;bottom:-12px;width:84px;height:84px;opacity:.18}
+.g .tick{position:absolute;right:12px;top:12px;width:24px;height:24px;border-radius:50%;background:#fff;color:#14171d;display:none;place-content:center;font-weight:800;font-size:14px}
+.g.sel .tick{display:grid}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.panel{background:var(--card);border-radius:20px;padding:16px}
+.panel label{display:block;font-size:13px;font-weight:700;color:var(--sub);margin-bottom:8px}
+input,textarea{width:100%;border-radius:14px;border:1px solid var(--line);background:var(--carbon);color:#fff;padding:0 14px;height:52px;font:800 20px Figtree;outline:none}
+textarea{height:80px;padding:12px 14px;font:500 16px Figtree;resize:none}
+input:focus,textarea:focus{border-color:#2f7bff;box-shadow:0 0 0 3px rgba(47,123,255,.35)}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);background:var(--carbon);border-radius:16px;padding:4px;gap:4px}
+.seg button{border:0;border-radius:12px;padding:14px 6px;background:transparent;color:var(--sub);font:800 15px Figtree;cursor:pointer;transition:.2s}
+.seg button small{display:block;font-weight:500;font-size:12px;opacity:.8}
+.seg button.sel{background:linear-gradient(120deg,#2563eb,#3b82f6);color:#fff;box-shadow:0 6px 16px rgba(37,99,235,.4)}
+.cd{margin-top:10px;display:none;border-radius:12px;padding:10px 14px;background:linear-gradient(120deg,#0047AB,#2f7bff);font-weight:600}
+.cd b{font-size:22px;font-weight:800}
+.cta{position:fixed;left:0;right:0;bottom:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:var(--void);border-top:1px solid var(--line)}
+.cta div{max-width:720px;margin:0 auto}
+.sumline{display:flex;justify-content:center;gap:10px;font-size:13px;color:var(--sub);margin-bottom:8px;min-height:20px}
+.sumline b{color:#fff}
+.go{width:100%;height:58px;border-radius:99px;border:0;background:#e4e9f3;color:#14171d;font:800 18px Figtree;cursor:pointer;box-shadow:0 10px 24px rgba(0,0,0,.45)}
+.go:disabled{opacity:.4}
+#custom{display:none;margin-top:12px}
+</style>
+</head>
+<body>
+<div class="bar">Last Mile</div>
+<main>
+  <div><h1>Let's plan your race</h1><p class="lede">Pick your goal and we'll build your plan, starting today.</p></div>
+
+  <section><h2>Your goal <em>REQUIRED</em></h2>
+    <div class="goals" id="goals"></div>
+    <div id="custom" class="panel"><label>Distance in km (1 to 42.2, like 3 or 8)</label><input id="km" type="number" step="0.1" placeholder="8"></div>
+  </section>
+
+  <section class="row">
+    <div class="panel"><label>Race date <span style="color:#ef4444">*</span></label><input id="date" type="date"><div class="cd" id="cd"></div></div>
+    <div class="panel"><label>Goal pace, min / km <span style="color:#ef4444">*</span></label><input id="pace" placeholder="6:30 or 6"></div>
+  </section>
+
+  <section><h2>Running history</h2>
+    <div class="seg" id="lvl"><button data-l="Beginner">Beginner<small>New</small></button><button data-l="Intermediate">Intermediate<small>Some races</small></button><button data-l="Advanced">Advanced<small>Racer</small></button></div>
+  </section>
+
+  <section><h2>Any injury?</h2><div class="panel"><textarea id="inj" placeholder="Leave blank if none, or say what hurts"></textarea></div></section>
+</main>
+<div class="cta"><div><div class="sumline" id="sum"></div><button class="go" id="go" disabled>Build my plan →</button></div></div>
+<script>
+const G=[["5K","5 km","#ef4444","#f97316"],["10K","10 km","#f97316","#e0c20d"],["21K","21.1 km","#22c55e","#0ba58f"],["Marathon","42.2 km","#6b7280","#9ca3af"],["Custom","Your distance","#5e37a0","#a070dc"]];
+const runner='<svg viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"><circle cx="31" cy="9" r="4" fill="#fff" stroke="none"/><path d="M26 17l-7 9 7 4-3 12M26 17l8 5 6-3M19 26l-9 2M26 30l8 3 2 8"/></svg>';
+const S={goal:"",level:""};
+const $=id=>document.getElementById(id);
+$("goals").innerHTML=G.map(g=>`<button class="g" data-g="${g[0]}" style="background:linear-gradient(130deg,${g[2]},${g[3]})"><span class="tick">✓</span><span class="big" style="${g[0]==="Marathon"?"font-size:29px;bottom:36px":""}">${g[0]==="Custom"?"Other":g[0]}</span><span class="km">${g[1]}</span>${runner}</button>`).join("");
+function paceOk(v){v=v.trim();return /^\d{1,2}(:[0-5]\d)?$/.test(v)}
+function refresh(){
+  document.querySelectorAll(".g").forEach(b=>b.classList.toggle("sel",b.dataset.g===S.goal));
+  $("custom").style.display=S.goal==="Custom"?"block":"none";
+  document.querySelectorAll("#lvl button").forEach(b=>b.classList.toggle("sel",b.dataset.l===S.level));
+  const d=$("date").value, days=d?Math.ceil((new Date(d+"T00:00:00")-new Date())/864e5):0;
+  $("cd").style.display=days>0?"block":"none"; $("cd").innerHTML=`<b>${days}</b> days to go · ${Math.ceil(days/7)} weeks`;
+  const goalOk=S.goal&&(S.goal!=="Custom"||(+$("km").value>=1&&+$("km").value<=42.2));
+  const ok=goalOk&&days>0&&paceOk($("pace").value);
+  $("go").disabled=!ok;
+  const goal=S.goal==="Custom"?($("km").value?$("km").value+" km":""):S.goal;
+  $("sum").innerHTML=[goal&&`<b>${goal}</b>`,days>0&&`<b>${new Date(d+"T00:00:00").toLocaleDateString(undefined,{day:"numeric",month:"short"})}</b>`,paceOk($("pace").value)&&$("pace").value&&`<b>${$("pace").value}</b> /km`].filter(Boolean).join(" · ")||"Fill in the required fields";
+}
+document.querySelectorAll(".g").forEach(b=>b.onclick=()=>{S.goal=b.dataset.g;refresh()});
+document.querySelectorAll("#lvl button").forEach(b=>b.onclick=()=>{S.level=S.level===b.dataset.l?"":b.dataset.l;refresh()});
+["date","pace","km"].forEach(id=>$(id).addEventListener("input",refresh));
+$("go").onclick=()=>{$("go").textContent="Building your plan…";$("go").disabled=true};
+refresh();
+</script>
+</body>
+</html>

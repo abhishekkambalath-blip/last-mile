@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Onboarding · Step by step</title>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--void:#14171d;--card:#262b35;--carbon:#1d2129;--ink:#fff;--sub:#9aa3b2;--muted:#6f7888;--line:rgba(255,255,255,.08);--blue:linear-gradient(120deg,#0047AB,#2f7bff)}
+*{box-sizing:border-box;margin:0}
+body{background:var(--void);color:var(--ink);font:16px/1.5 Figtree,system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column}
+.bar{background:var(--card);height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 16px}
+.av{width:44px;height:44px;border-radius:50%;background:#0047AB;display:grid;place-content:center}
+.logo{font-weight:800;font-size:20px;letter-spacing:-.02em}
+.wrap{max-width:560px;width:100%;margin:0 auto;padding:20px 16px 32px;flex:1;display:flex;flex-direction:column}
+.prog{display:flex;gap:6px;margin-bottom:28px}
+.prog i{flex:1;height:6px;border-radius:9px;background:var(--card);transition:.4s}
+.prog i.on{background:var(--c,#4c8dff)}
+.step{flex:1;animation:in .35s both}
+@keyframes in{from{opacity:0;transform:translateX(24px)}}
+.kick{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--sub)}
+h1{font-size:34px;line-height:1.1;font-weight:800;letter-spacing:-.02em;margin:6px 0 8px}
+.sub{color:var(--sub);margin-bottom:22px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tile{position:relative;overflow:hidden;border:0;border-radius:20px;padding:16px;height:104px;text-align:left;color:#fff;cursor:pointer;font:inherit;transition:.2s;opacity:.88}
+.tile:hover{opacity:1}.tile.sel{opacity:1;transform:scale(1.03);box-shadow:0 0 0 3px #fff}
+.tile b{position:absolute;left:16px;bottom:14px;font-size:24px;font-weight:800}
+.tile small{position:absolute;right:14px;top:14px;font-size:12px;font-weight:700;opacity:.85}
+.tile.wide{grid-column:span 2;height:84px}
+input,textarea{width:100%;height:56px;border-radius:16px;border:1px solid var(--line);background:var(--carbon);color:var(--ink);font:700 22px Figtree;padding:0 18px;outline:none}
+input:focus,textarea:focus{border-color:#2f7bff;box-shadow:0 0 0 3px rgba(47,123,255,.35)}
+textarea{height:110px;padding:14px 18px;font:500 17px Figtree;resize:none}
+.pill{display:inline-block;margin-top:14px;padding:12px 16px;border-radius:14px;background:var(--blue);font-weight:700}
+.pill b{font-size:24px;font-weight:800}
+.stepper{display:flex;align-items:center;justify-content:center;gap:18px;margin:10px 0 18px}
+.stepper button{width:64px;height:64px;border-radius:50%;border:0;background:var(--card);color:#fff;font-size:30px;cursor:pointer}
+.stepper button:active{transform:scale(.94)}
+.pace{font-size:68px;font-weight:800;letter-spacing:-.03em;min-width:200px;text-align:center}
+.pace small{font-size:16px;color:var(--sub);font-weight:600}
+.chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.chip{border:1px solid var(--line);background:var(--card);color:#fff;border-radius:99px;padding:9px 16px;font:700 14px Figtree;cursor:pointer}
+.chip.sel{background:#fff;color:var(--void)}
+.lvl{display:flex;align-items:center;gap:14px;width:100%;border:0;border-radius:20px;padding:16px;margin-bottom:12px;color:#fff;font:inherit;cursor:pointer;text-align:left;background:var(--card);box-shadow:inset 0 0 0 2px transparent;transition:.2s}
+.lvl.sel{box-shadow:inset 0 0 0 3px var(--c)}
+.lvl i{width:46px;height:46px;border-radius:14px;background:var(--c);flex:none}
+.lvl b{display:block;font-size:19px;font-weight:800}.lvl span{color:var(--sub);font-size:14px}
+.sum{background:var(--card);border-radius:20px;padding:6px 18px}
+.sum div{display:flex;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--line)}.sum div:last-child{border:0}
+.sum span{color:var(--sub)}.sum b{font-weight:800}
+.nav{display:flex;gap:12px;margin-top:24px}
+.btn{height:56px;border-radius:99px;border:0;font:800 17px Figtree;cursor:pointer;transition:.2s}
+.back{flex:0 0 96px;background:var(--card);color:var(--sub)}
+.next{flex:1;background:#e4e9f3;color:var(--void)}.next:disabled{opacity:.35;cursor:not-allowed}
+.go{background:var(--blue);color:#fff}
+</style>
+</head>
+<body>
+<div class="bar"><span class="av"><svg width="22" height="22" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"><circle cx="31" cy="9" r="4" fill="#fff" stroke="none"/><path d="M26 17l-7 9 7 4-3 12M26 17l8 5 6-3M19 26l-9 2M26 30l8 3 2 8"/></svg></span><span class="logo">Last Mile</span><span style="width:44px"></span></div>
+<div class="wrap">
+  <div class="prog" id="prog"></div>
+  <div class="step" id="step"></div>
+  <div class="nav" id="nav"></div>
+</div>
+<script>
+const G=[["5K","5 km","#ef4444","#f97316"],["10K","10 km","#f97316","#e0c20d"],["21K","21.1 km","#22c55e","#0ba58f"],["Marathon","42.2 km","#6b7280","#9ca3af"]];
+const S={goal:"",km:"",date:"",pace:390,level:"",injury:""};
+const COLORS=["#f08a1c","#2f7bff","#e0c20d","#58b91e","#a070dc","#4c8dff"];
+let i=0;
+const fmt=s=>Math.floor(s/60)+":"+String(s%60).padStart(2,"0");
+const days=()=>Math.max(0,Math.ceil((new Date(S.date+"T00:00:00")-new Date())/864e5));
+const valid=()=>[S.goal&&(S.goal!=="Custom"||(+S.km>=1&&+S.km<=42.2)),S.date&&days()>0,true,true,true,true][i];
+const steps=[
+ ()=>`<div class="kick">Step 1 of 5</div><h1>What are you training for?</h1><p class="sub">Pick a race, or type your own distance.</p><div class="grid">${G.map(g=>`<button class="tile ${S.goal===g[0]?"sel":""}" style="background:linear-gradient(120deg,${g[2]},${g[3]})" data-goal="${g[0]}"><small>${g[1]}</small><b>${g[0]}</b></button>`).join("")}<button class="tile wide ${S.goal==="Custom"?"sel":""}" style="background:linear-gradient(120deg,#5e37a0,#a070dc)" data-goal="Custom"><small>Type your own</small><b>Custom distance</b></button></div>${S.goal==="Custom"?`<div style="margin-top:14px;display:flex;gap:10px;align-items:center"><input id="km" type="number" step="0.1" placeholder="8" value="${S.km}"><b style="color:#9aa3b2">km</b></div>`:""}`,
+ ()=>`<div class="kick">Step 2 of 5</div><h1>When is your race?</h1><p class="sub">We'll build your plan from today to race day.</p><input id="date" type="date" value="${S.date}">${S.date&&days()>0?`<div class="pill"><b>${days()}</b> days to go · ${Math.ceil(days()/7)} weeks</div>`:""}`,
+ ()=>`<div class="kick">Step 3 of 5</div><h1>What pace are you aiming for?</h1><p class="sub">Your goal pace for race day, per kilometre.</p><div class="stepper"><button data-p="-5">−</button><div class="pace">${fmt(S.pace)}<br><small>min / km</small></div><button data-p="5">+</button></div><div class="chips">${[300,330,360,390,420,480].map(p=>`<button class="chip ${S.pace===p?"sel":""}" data-pp="${p}">${fmt(p)}</button>`).join("")}</div>`,
+ ()=>`<div class="kick">Step 4 of 5</div><h1>How would you describe your running?</h1><p class="sub">Optional. It sets how big your first weeks are.</p>${[["Beginner","New to running","#93c5fd"],["Intermediate","Some races under your belt","#3b82f6"],["Advanced","A regular racer","#2563eb"]].map(l=>`<button class="lvl ${S.level===l[0]?"sel":""}" style="--c:${l[2]}" data-lvl="${l[0]}"><i></i><div><b>${l[0]}</b><span>${l[1]}</span></div></button>`).join("")}`,
+ ()=>`<div class="kick">Step 5 of 5</div><h1>Any injury we should know about?</h1><p class="sub">Leave it blank if none. We'll keep things lighter if you have one.</p><textarea id="inj" placeholder="e.g. Knee pain after my first 10K">${S.injury}</textarea><div class="chips" style="margin-top:12px"><button class="chip" data-inj="">No injury</button></div>`,
+ ()=>`<div class="kick">All set</div><h1>Ready to build your plan</h1><p class="sub">Here is what we'll use.</p><div class="sum"><div><span>Goal</span><b>${S.goal==="Custom"?S.km+" km":S.goal}</b></div><div><span>Race date</span><b>${new Date(S.date+"T00:00:00").toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"})}</b></div><div><span>Goal pace</span><b>${fmt(S.pace)} /km</b></div><div><span>Level</span><b>${S.level||"Beginner"}</b></div><div><span>Injury</span><b>${S.injury||"None"}</b></div></div>`
+];
+function draw(){
+  document.getElementById("prog").innerHTML=steps.slice(0,5).map((_,k)=>`<i class="${k<=i?"on":""}" style="--c:${COLORS[k]}"></i>`).join("");
+  const el=document.getElementById("step"); el.style.animation="none"; el.offsetHeight; el.style.animation=""; el.innerHTML=steps[i]();
+  document.getElementById("nav").innerHTML=(i?`<button class="btn back" id="back">Back</button>`:"")+(i<5?`<button class="btn next" id="next" ${valid()?"":"disabled"}>${i===4?"Review":"Next"}</button>`:`<button class="btn next go" style="color:#fff" id="build">Build my plan →</button>`);
+  bind();
+}
+function bind(){
+  const q=s=>document.querySelectorAll(s);
+  q("[data-goal]").forEach(b=>b.onclick=()=>{S.goal=b.dataset.goal;draw();if(S.goal==="Custom")document.getElementById("km")?.focus()});
+  document.getElementById("km")?.addEventListener("input",e=>{S.km=e.target.value;document.getElementById("next").disabled=!valid()});
+  document.getElementById("date")?.addEventListener("input",e=>{S.date=e.target.value;draw();document.getElementById("date").focus()});
+  q("[data-p]").forEach(b=>b.onclick=()=>{S.pace=Math.min(900,Math.max(150,S.pace+ +b.dataset.p));draw()});
+  q("[data-pp]").forEach(b=>b.onclick=()=>{S.pace=+b.dataset.pp;draw()});
+  q("[data-lvl]").forEach(b=>b.onclick=()=>{S.level=b.dataset.lvl;draw()});
+  document.getElementById("inj")?.addEventListener("input",e=>S.injury=e.target.value);
+  q("[data-inj]").forEach(b=>b.onclick=()=>{S.injury="";draw()});
+  document.getElementById("back")?.addEventListener("click",()=>{i--;draw()});
+  document.getElementById("next")?.addEventListener("click",()=>{i++;draw()});
+  document.getElementById("build")?.addEventListener("click",e=>{e.target.textContent="Building your plan…";e.target.disabled=true});
+}
+draw();
+</script>
+</body>
+</html>

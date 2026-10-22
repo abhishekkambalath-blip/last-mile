@@ -59,3 +59,11 @@ export function formatDuration(seconds: number) {
   const ss = String(s).padStart(2, "0");
   return h > 0 ? `${h}:${mm}:${ss}` : `${m}:${ss}`;
 }
+
+/** Thins a route to at most `max` points (always keeping the first and last) for saving and drawing. */
+export function simplifyRoute(points: Point[], max = 200): [number, number][] {
+  if (points.length === 0) return [];
+  const step = Math.max(1, Math.ceil(points.length / max));
+  const out = points.filter((_, i) => i % step === 0 || i === points.length - 1);
+  return out.map((p) => [Math.round(p.lat * 1e5) / 1e5, Math.round(p.lng * 1e5) / 1e5]);
+}

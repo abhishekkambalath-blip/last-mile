@@ -3,7 +3,8 @@
 import { useMemo, useSyncExternalStore } from "react";
 import { PLAN_STORAGE_KEY, type Plan, type Profile } from "@/lib/plan";
 
-export type Saved = { profile: Profile; plan: Plan | null };
+// createdAt is when the plan was built; it decides which calendar week is week 1.
+export type Saved = { profile: Profile; plan: Plan | null; createdAt?: string };
 
 const EVENT = "last-mile:store";
 

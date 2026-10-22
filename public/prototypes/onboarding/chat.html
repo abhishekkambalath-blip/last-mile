@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Onboarding · Coach chat</title>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--void:#14171d;--card:#262b35;--carbon:#1d2129;--sub:#9aa3b2;--line:rgba(255,255,255,.08)}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{background:var(--void);color:#fff;font:16px/1.45 Figtree,system-ui,sans-serif;display:flex;flex-direction:column}
+.bar{background:var(--card);height:64px;display:flex;align-items:center;gap:12px;padding:0 16px;flex:none}
+.coach{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#0047AB,#2f7bff);display:grid;place-content:center;position:relative}
+.coach::after{content:"";position:absolute;right:0;bottom:0;width:11px;height:11px;border-radius:50%;background:#58b91e;border:2px solid var(--card)}
+.bar b{display:block;font-size:17px;font-weight:800;line-height:1.1}.bar span{font-size:12px;color:var(--sub)}
+#feed{flex:1;overflow-y:auto;padding:18px 16px;max-width:640px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth}
+.m{max-width:82%;padding:12px 16px;border-radius:20px;animation:pop .35s both;font-size:16px}
+@keyframes pop{from{opacity:0;transform:translateY(10px) scale(.97)}}
+.c{background:var(--card);border-bottom-left-radius:6px;align-self:flex-start}
+.u{background:linear-gradient(120deg,#0047AB,#2f7bff);border-bottom-right-radius:6px;align-self:flex-end;font-weight:700}
+.typing{display:flex;gap:5px;padding:16px 18px}.typing i{width:8px;height:8px;border-radius:50%;background:var(--sub);animation:b 1s infinite}.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes b{50%{transform:translateY(-5px);opacity:.5}}
+.tray{flex:none;background:var(--card);padding:14px 16px calc(14px + env(safe-area-inset-bottom));border-radius:24px 24px 0 0;box-shadow:0 -10px 30px rgba(0,0,0,.35)}
+.tray>div{max-width:640px;margin:0 auto}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:0;border-radius:99px;padding:12px 18px;color:#fff;font:800 15px Figtree;cursor:pointer;transition:.15s}
+.chip:active{transform:scale(.95)}
+.row{display:flex;gap:10px}
+input{flex:1;height:52px;border-radius:99px;border:1px solid var(--line);background:var(--carbon);color:#fff;font:700 18px Figtree;padding:0 20px;outline:none}
+input:focus{border-color:#2f7bff}
+.send{width:52px;height:52px;border-radius:50%;border:0;background:#e4e9f3;color:#14171d;font-size:22px;font-weight:800;cursor:pointer}
+.hint{font-size:12px;color:var(--sub);margin-top:8px;text-align:center}
+.build{width:100%;height:56px;border-radius:99px;border:0;background:#e4e9f3;color:#14171d;font:800 18px Figtree;cursor:pointer}
+.bp{height:8px;border-radius:9px;background:var(--carbon);overflow:hidden;margin-top:10px}.bp i{display:block;height:100%;width:0;background:linear-gradient(90deg,#58b91e,#e0c20d,#f08a1c);transition:width 2.4s ease}
+</style>
+</head>
+<body>
+<div class="bar"><span class="coach"><svg width="22" height="22" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"><circle cx="31" cy="9" r="4" fill="#fff" stroke="none"/><path d="M26 17l-7 9 7 4-3 12M26 17l8 5 6-3M19 26l-9 2M26 30l8 3 2 8"/></svg></span><div><b>Coach Mile</b><span>Online · plans your race</span></div></div>
+<div id="feed"></div>
+<div class="tray"><div id="tray"></div></div>
+<script>
+const $=id=>document.getElementById(id),feed=$("feed"),tray=$("tray");
+const A={};
+const GC={"5K":["#ef4444","#f97316"],"10K":["#f97316","#e0c20d"],"21K":["#22c55e","#0ba58f"],"Marathon":["#6b7280","#9ca3af"],"Something else":["#5e37a0","#a070dc"]};
+const LC={"Beginner":"#3b82f6","Intermediate":"#2563eb","Advanced":"#1d4ed8"};
+const say=(t,cls="c")=>{const d=document.createElement("div");d.className="m "+cls;d.innerHTML=t;feed.appendChild(d);feed.scrollTop=feed.scrollHeight;setTimeout(()=>feed.scrollTop=feed.scrollHeight,90)};
+function coach(text,then){tray.innerHTML="";const t=document.createElement("div");t.className="m c typing";t.innerHTML="<i></i><i></i><i></i>";feed.appendChild(t);feed.scrollTop=feed.scrollHeight;setTimeout(()=>{t.remove();say(text);then()},650)}
+const chips=(opts,cb,colors)=>{tray.innerHTML=`<div class="chips">${opts.map(o=>`<button class="chip" style="background:${colors&&colors[o]?(Array.isArray(colors[o])?`linear-gradient(120deg,${colors[o][0]},${colors[o][1]})`:colors[o]):"#3a4150"}">${o}</button>`).join("")}</div>`;tray.querySelectorAll("button").forEach(b=>b.onclick=()=>cb(b.textContent))};
+const field=(type,ph,cb,hint,validate)=>{tray.innerHTML=`<div class="row"><input id="f" type="${type}" placeholder="${ph}" ${type==="number"?'step="0.1"':""}><button class="send" id="s">→</button></div>${hint?`<div class="hint">${hint}</div>`:""}`;const go=()=>{const v=$("f").value.trim();if(validate(v))cb(v);else $("f").style.borderColor="#ef4444"};$("s").onclick=go;$("f").onkeydown=e=>e.key==="Enter"&&go();$("f").focus()};
+const pace=v=>/^\d{1,2}$/.test(v)?v+":00":/^\d{1,2}:[0-5]\d$/.test(v)?v:null;
+function q1(){coach("Hi, I'm Coach Mile. What are you training for?",()=>chips(["5K","10K","21K","Marathon","Something else"],g=>{say(g,"m u");if(g==="Something else")q1b();else{A.goal=g;q2()}},GC))}
+function q1b(){coach("No problem. How many kilometres is your race? A single digit is fine, like 3 or 8.",()=>field("number","8",v=>{say(v+" km","m u");A.goal=v+" km";q2()},"Between 1 and 42.2 km",v=>+v>=1&&+v<=42.2))}
+function q2(){coach(`${A.goal}, nice. When is race day?`,()=>field("date","",v=>{const d=Math.ceil((new Date(v+"T00:00:00")-new Date())/864e5);if(d<1)return;A.date=v;say(new Date(v+"T00:00:00").toLocaleDateString(undefined,{day:"numeric",month:"long"}),"m u");say(`That's <b>${d} days</b> away, about ${Math.ceil(d/7)} weeks. Plenty to work with.`);q3()},"Pick a day in the future",v=>v&&new Date(v+"T00:00:00")>new Date()))}
+function q3(){setTimeout(()=>coach("What pace would you like to run on the day, per kilometre? Type 6 for 6:00, or 6:30.",()=>field("text","6:30",v=>{A.pace=pace(v);say(A.pace+" /km","m u");q4()},"Minutes per km",v=>!!pace(v))),500)}
+function q4(){coach("How would you describe your running so far?",()=>chips(["Beginner","Intermediate","Advanced"],l=>{A.level=l;say(l,"m u");q5()},LC))}
+function q5(){coach("Last one. Any injury I should plan around?",()=>chips(["No injury","I have an injury"],c=>{say(c,"m u");if(c==="No injury"){A.injury="";done()}else coach("Tell me a little about it.",()=>field("text","e.g. knee pain",v=>{A.injury=v;say(v,"m u");done()},"",v=>v.length>0))}))}
+function done(){coach(`Perfect. Here's the plan: <b>${A.goal}</b> on <b>${new Date(A.date+"T00:00:00").toLocaleDateString(undefined,{day:"numeric",month:"short"})}</b> at <b>${A.pace}/km</b>, built for a <b>${A.level.toLowerCase()}</b> runner${A.injury?", kept lighter for your injury":""}.`,()=>{tray.innerHTML='<button class="build" id="b">Build my plan →</button>';$("b").onclick=()=>{tray.innerHTML='<div style="text-align:center;font-weight:700">Building your plan…</div><div class="bp"><i id="bar"></i></div>';requestAnimationFrame(()=>requestAnimationFrame(()=>$("bar").style.width="94%"))}})}
+q1();
+</script>
+</body>
+</html>

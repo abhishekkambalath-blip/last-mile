@@ -1,17 +1,33 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import BottomTabs from "@/components/BottomTabs";
-import { addPoint, formatDuration, formatPace, newTrack, type Track } from "@/lib/gps";
-import { loadRuns, saveRun, type Run } from "@/lib/runs";
+import RouteSvg, { type LatLng } from "@/components/RouteSvg";
+import { addPoint, formatDuration, formatPace, newTrack, simplifyRoute, type Track } from "@/lib/gps";
+import { saveRun, useRuns, type Run } from "@/lib/runs";
+
+// Leaflet needs the browser, so the map is loaded on the client only.
+const RouteMap = dynamic(() => import("@/components/RouteMap"), {
+  ssr: false,
+  loading: () => <div className="h-full w-full animate-pulse bg-carbon" />,
+});
 
 type Phase = "idle" | "tracking" | "manual" | "checkin" | "saved";
+
+// Where location access stands. "insecure" means the page is not on https, where browsers switch GPS off.
+type LocStatus = "checking" | "prompt" | "locating" | "ready" | "denied" | "unavailable" | "insecure";
+type LocState = { status: LocStatus; here?: LatLng; accuracy?: number };
+
+const NO_ROUTE: LatLng[] = [];
 
 const card = "rounded-xl border border-line bg-elevated p-5";
 const input =
   "w-full rounded-md border border-line bg-carbon px-3 py-2.5 text-ink placeholder:text-muted outline-none transition focus:border-volt focus:ring-2 focus:ring-volt/30";
 const label = "block space-y-1.5 font-mono-tech text-[11px] font-medium uppercase tracking-wider text-subtext";
+
+const mapBox = "relative h-[40vh] min-h-[220px] overflow-hidden rounded-2xl border border-line bg-carbon";
 
 const today = () => new Date().toISOString().slice(0, 10);
 
@@ -21,18 +37,16 @@ export default function RunPage() {
   const [distanceM, setDistanceM] = useState(0);
   const [elapsed, setElapsed] = useState(0);
   const [draft, setDraft] = useState<Run | null>(null);
-  const [runs, setRuns] = useState<Run[]>([]);
+  const [route, setRoute] = useState<LatLng[]>([]);
+  const [loc, setLoc] = useState<LocState>({ status: "checking" });
+  const runs = useRuns();
+  const hereWatch = useRef<number | null>(null);
 
   const track = useRef<Track>(newTrack());
   const startedAt = useRef(0);
   const watchId = useRef<number | null>(null);
   const wakeLock = useRef<WakeLockSentinel | null>(null);
-
-  useEffect(() => {
-    // Runs once on mount; localStorage isn't available during server render.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setRuns(loadRuns());
-  }, []);
+  const lastMapUpdate = useRef(0);
 
   // Timer while tracking.
   useEffect(() => {
@@ -62,6 +76,74 @@ export default function RunPage() {
     return () => document.removeEventListener("visibilitychange", onVisible);
   }, [phase, requestWakeLock]);
 
+  // While the runner gets ready, watch their position: the map shows where they are, and the GPS
+  // already has a good fix by the time they press Record workout.
+  const stopHere = useCallback(() => {
+    if (hereWatch.current !== null) navigator.geolocation?.clearWatch(hereWatch.current);
+    hereWatch.current = null;
+  }, []);
+
+  const watchHere = useCallback(() => {
+    if (hereWatch.current !== null || !navigator.geolocation) return;
+    hereWatch.current = navigator.geolocation.watchPosition(
+      (pos) => setLoc({ status: "ready", here: [pos.coords.latitude, pos.coords.longitude], accuracy: pos.coords.accuracy }),
+      (err) => {
+        if (err.code === err.PERMISSION_DENIED) {
+          stopHere();
+          setLoc((l) => ({ ...l, status: "denied" }));
+        } else setLoc((l) => ({ ...l, status: l.here ? "ready" : "unavailable" })); // the watch keeps trying
+      },
+      { enableHighAccuracy: true, maximumAge: 5000, timeout: 30000 },
+    );
+  }, [stopHere]);
+
+  // On opening the screen: check whether location is already allowed. If it is, show where the runner is
+  // straight away; if not, the screen offers an "Allow location" button. Nothing is asked without a tap.
+  useEffect(() => {
+    let cancelled = false;
+    let perm: PermissionStatus | null = null;
+    const onChange = () => {
+      if (perm?.state === "granted") {
+        setLoc((l) => ({ ...l, status: l.here ? "ready" : "locating" }));
+        watchHere();
+      } else if (perm?.state === "denied") {
+        stopHere();
+        setLoc((l) => ({ ...l, status: "denied" }));
+      }
+    };
+    (async () => {
+      await Promise.resolve();
+      if (cancelled) return;
+      if (!window.isSecureContext) return setLoc({ status: "insecure" });
+      if (!navigator.geolocation) return setLoc({ status: "unavailable" });
+      try {
+        perm = await navigator.permissions.query({ name: "geolocation" });
+        perm.addEventListener("change", onChange);
+      } catch {
+        // Some browsers have no Permissions API. The "Allow location" button still works there.
+      }
+      if (cancelled) return;
+      if (perm?.state === "granted") {
+        setLoc({ status: "locating" });
+        watchHere();
+      } else if (perm?.state === "denied") setLoc({ status: "denied" });
+      else setLoc({ status: "prompt" });
+    })();
+    return () => {
+      cancelled = true;
+      perm?.removeEventListener("change", onChange);
+      stopHere();
+    };
+  }, [watchHere, stopHere]);
+
+  // The browser shows its own permission question when this runs.
+  function allowLocation() {
+    setLoc((l) => ({ ...l, status: "locating" }));
+    watchHere();
+  }
+
+  const locationOn = loc.status === "ready" || loc.status === "locating";
+
   // Stop everything if the runner leaves the page.
   useEffect(
     () => () => {
@@ -77,9 +159,12 @@ export default function RunPage() {
       setError("This browser can't read your location. Use manual entry instead.");
       return;
     }
+    stopHere(); // the run's own GPS watch takes over from here
     track.current = newTrack();
     setDistanceM(0);
     setElapsed(0);
+    setRoute([]);
+    lastMapUpdate.current = 0;
     startedAt.current = Date.now();
     watchId.current = navigator.geolocation.watchPosition(
       (pos) => {
@@ -90,6 +175,12 @@ export default function RunPage() {
           t: pos.timestamp,
         });
         setDistanceM(track.current.distanceM);
+        // Redraw the map at most once a second to keep the page smooth and save battery.
+        const now = Date.now();
+        if (now - lastMapUpdate.current >= 1000) {
+          lastMapUpdate.current = now;
+          setRoute(track.current.points.map((p) => [p.lat, p.lng] as LatLng));
+        }
       },
       (err) =>
         setError(
@@ -112,6 +203,7 @@ export default function RunPage() {
     if (dist < 50) {
       setError("We didn't record any distance. Use manual entry to log this run, or start again.");
       setPhase("idle");
+      if (locationOn) watchHere();
       return;
     }
     setError("");
@@ -123,7 +215,9 @@ export default function RunPage() {
       durationSec: seconds,
       paceMinPerKm: formatPace(dist, seconds),
       flagged: track.current.spike,
+      route: simplifyRoute(track.current.points),
     });
+    setRoute(track.current.points.map((p) => [p.lat, p.lng] as LatLng));
     setPhase("checkin");
   }
 
@@ -158,15 +252,16 @@ export default function RunPage() {
       checkIn: { effort: Number(f.get("effort")), feeling: String(f.get("feeling") ?? "").trim().slice(0, 1000) },
     };
     saveRun(run);
-    setRuns(loadRuns());
     setDraft(run);
     setPhase("saved");
   }
 
   const reset = () => {
     setDraft(null);
+    setRoute([]);
     setError("");
     setPhase("idle");
+    if (locationOn) watchHere();
   };
 
   return (
@@ -187,26 +282,94 @@ export default function RunPage() {
         )}
 
         {phase === "idle" && (
-          <section className={`${card} space-y-4 text-center`}>
-            <p className="text-subtext">
-              Tap Start, then keep this screen open while you run. Your phone&apos;s GPS tracks distance and pace.
-            </p>
-            <button
-              onClick={start}
-              className="mx-auto flex h-36 w-36 items-center justify-center rounded-full bg-volt font-athletic text-3xl font-bold uppercase tracking-widest text-void shadow-[0_0_40px_rgba(190,242,100,0.3)] transition hover:scale-105"
-            >
-              Start
-            </button>
-            <button
-              onClick={() => {
-                setError("");
-                setPhase("manual");
-              }}
-              className="text-sm text-subtext underline hover:text-ink"
-            >
-              GPS not working? Enter a run manually
-            </button>
-          </section>
+          <div className="space-y-4">
+            <div className={mapBox}>
+              <RouteMap route={NO_ROUTE} here={loc.here} accuracy={loc.accuracy} />
+              <div className="pointer-events-none absolute inset-x-0 bottom-3 z-[500] flex justify-center">
+                <span className="flex items-center gap-2 rounded-full bg-void/85 px-3 py-1 text-xs font-semibold text-subtext">
+                  {loc.status === "ready" && loc.here ? (
+                    <>
+                      <i className="h-2 w-2 rounded-full bg-[#58b91e]" />
+                      GPS ready · ±{Math.round(loc.accuracy ?? 0)} m
+                    </>
+                  ) : loc.status === "locating" ? (
+                    <>
+                      <i className="h-2 w-2 animate-pulse rounded-full bg-[#e0c20d]" />
+                      Finding your location…
+                    </>
+                  ) : (
+                    "Your route will appear here"
+                  )}
+                </span>
+              </div>
+            </div>
+
+            {!locationOn && loc.status !== "checking" && (
+              <section className="space-y-3 rounded-2xl bg-elevated p-4" aria-live="polite">
+                <div className="flex items-center gap-3">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white" style={{ background: "linear-gradient(135deg,#0047AB,#2f7bff)" }}>
+                    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z" />
+                      <circle cx="12" cy="9.5" r="2.5" />
+                    </svg>
+                  </span>
+                  <h2 className="text-lg font-extrabold">
+                    {loc.status === "prompt" && "Turn on location"}
+                    {loc.status === "denied" && "Location is blocked"}
+                    {loc.status === "insecure" && "Location needs a secure link"}
+                    {loc.status === "unavailable" && "Can't find your location"}
+                  </h2>
+                </div>
+                <p className="text-sm text-subtext">
+                  {loc.status === "prompt" &&
+                    "Last Mile uses your phone's GPS to show where you are and to track your distance, pace and route. It's only used while this screen is open."}
+                  {loc.status === "denied" &&
+                    "Allow location for this site in your browser's settings, then come back to this screen. You can still enter a run by hand."}
+                  {loc.status === "insecure" &&
+                    "Browsers only share GPS on an https address. Open Last Mile on its https link (or on this computer at localhost). Until then, enter runs by hand."}
+                  {loc.status === "unavailable" && "Check that location is switched on for your phone, or step outside for a clearer view of the sky."}
+                </p>
+                {(loc.status === "prompt" || loc.status === "unavailable" || loc.status === "denied") && (
+                  <button
+                    onClick={allowLocation}
+                    className="flex h-12 w-full items-center justify-center rounded-full font-bold text-white transition active:scale-[0.99]"
+                    style={{ background: "linear-gradient(120deg,#0047AB,#2f7bff)" }}
+                  >
+                    {loc.status === "prompt" ? "Allow location" : "Try again"}
+                  </button>
+                )}
+              </section>
+            )}
+            <section className={`${card} space-y-4 text-center`}>
+              <p className="text-subtext">
+                Tap Record workout, then keep this screen open while you run. Your phone&apos;s GPS tracks distance, pace and your route.
+              </p>
+              <button
+                onClick={start}
+                className="flex h-14 w-full items-center justify-center gap-3 rounded-full bg-volt text-lg font-bold text-void shadow-lg shadow-black/40 transition active:scale-[0.99]"
+              >
+                <svg viewBox="0 0 24 24" className="h-6 w-6" fill="currentColor" aria-hidden="true">
+                  <path d="M7 4.5v15l12-7.5z" />
+                </svg>
+                Record workout
+              </button>
+              <button
+                onClick={() => {
+                  setError("");
+                  setPhase("manual");
+                }}
+                className="text-sm text-subtext underline hover:text-ink"
+              >
+                GPS not working? Enter a run manually
+              </button>
+            </section>
+          </div>
+        )}
+
+        {phase === "tracking" && (
+          <div className={mapBox}>
+            <RouteMap route={route} follow here={loc.here} accuracy={loc.accuracy} />
+          </div>
         )}
 
         {phase === "tracking" && (
@@ -269,6 +432,12 @@ export default function RunPage() {
           </form>
         )}
 
+        {phase === "checkin" && draft?.source === "gps" && (
+          <div className={mapBox}>
+            <RouteMap route={route} fit />
+          </div>
+        )}
+
         {phase === "checkin" && draft && (
           <form onSubmit={submitCheckIn} className={`${card} space-y-4`}>
             <div className="rounded-md border border-line bg-carbon p-3 text-center">
@@ -285,7 +454,7 @@ export default function RunPage() {
             <h2 className="font-athletic text-xl font-semibold uppercase tracking-widest">Quick check-in</h2>
             <label className={label}>
               How hard did it feel? (1 = very easy, 10 = all out)
-              <input name="effort" type="range" min="1" max="10" defaultValue="5" className="w-full accent-[#BEF264]" />
+              <input name="effort" type="range" min="1" max="10" defaultValue="5" className="w-full accent-[#4C8DFF]" />
               <span className="flex justify-between text-xs text-muted">
                 <span>1</span>
                 <span>10</span>
@@ -335,6 +504,7 @@ export default function RunPage() {
                     {r.flagged && " · flagged"}
                   </div>
                   {r.checkIn?.feeling && <p className="mt-1 text-ink">&ldquo;{r.checkIn.feeling}&rdquo;</p>}
+                  {r.route && r.route.length > 1 && <RouteSvg route={r.route} className="mt-3 h-28 w-full rounded-lg bg-carbon" />}
                 </li>
               ))}
             </ul>
