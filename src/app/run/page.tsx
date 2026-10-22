@@ -509,7 +509,7 @@ export default function RunPage() {
                     <span className="text-muted">{new Date(r.date).toLocaleDateString()}</span>
                   </div>
                   <div className="text-muted">
-                    {formatDuration(r.durationSec)} · {r.paceMinPerKm} min/km · {r.source === "gps" ? "GPS" : "manual"}
+                    {formatDuration(r.durationSec)} · {r.paceMinPerKm} min/km · {r.source === "gps" ? "GPS" : r.source === "device" ? (r.device ?? "device") : "manual"}
                     {r.checkIn && ` · effort ${r.checkIn.effort}/10`}
                     {r.flagged && " · flagged"}
                   </div>

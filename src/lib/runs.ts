@@ -8,7 +8,8 @@ export type CheckIn = { effort: number; feeling: string };
 export type Run = {
   id: string;
   date: string; // ISO timestamp
-  source: "gps" | "manual";
+  source: "gps" | "manual" | "device";
+  device?: string; // which band it came from, e.g. "WHOOP"
   distanceKm: number;
   durationSec: number;
   paceMinPerKm: string;

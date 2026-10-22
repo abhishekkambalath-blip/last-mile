@@ -31,3 +31,21 @@ create policy "own athlete" on athletes for all using (auth.uid() = user_id) wit
 create policy "own runs" on runs for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 -- Runners can read their subscription but not change it: only the server (service role) writes it.
 create policy "read own subscription" on subscriptions for select using (auth.uid() = user_id);
+
+-- Fitness bands: tokens are encrypted by the server and can only be read with the service role (no policies on purpose).
+create table if not exists device_connections (
+  user_id uuid not null references auth.users on delete cascade,
+  provider text not null check (provider in ('whoop', 'polar', 'coros')),
+  tokens text not null,               -- encrypted JSON
+  connected_at timestamptz not null default now(),
+  last_synced_at timestamptz,
+  primary key (user_id, provider)
+);
+create table if not exists oauth_states (
+  state text primary key,
+  user_id uuid not null references auth.users on delete cascade,
+  provider text not null,
+  created_at timestamptz not null default now()
+);
+alter table device_connections enable row level security;
+alter table oauth_states enable row level security;
