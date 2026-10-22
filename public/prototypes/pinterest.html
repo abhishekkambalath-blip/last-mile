@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Last Mile · Collage</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,800;1,9..144,600&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--cream:#fff6ee;--ink:#2b2118;--sub:#8a7a6c;--peach:#ffc9a9;--butter:#ffe8a3;--sage:#cfe3c3;--sky:#c8def5;--rose:#f7c6cf;--tomato:#ee5a36}
+*{box-sizing:border-box;margin:0}
+body{background:var(--cream);color:var(--ink);font:15px/1.5 'DM Sans',sans-serif;padding:0 20px 80px}
+nav{max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;padding:20px 0}
+.logo{font:800 24px Fraunces;letter-spacing:-.02em}.logo i{color:var(--tomato)}
+.search{flex:1;max-width:340px;margin:0 20px;background:#fff;border-radius:99px;padding:10px 18px;color:var(--sub);box-shadow:0 2px 0 rgba(43,33,24,.06)}
+.avatar{width:40px;height:40px;border-radius:50%;background:var(--tomato);color:#fff;display:grid;place-content:center;font-weight:700}
+header{text-align:center;margin:30px auto 36px;max-width:720px}
+h1{font:800 clamp(52px,9vw,96px)/.95 Fraunces;letter-spacing:-.04em}
+h1 em{font-style:italic;color:var(--tomato);font-weight:600}
+header p{color:var(--sub);margin-top:12px;font-size:17px}
+.masonry{max-width:1100px;margin:0 auto;columns:3 300px;column-gap:18px}
+.tile{break-inside:avoid;margin-bottom:18px;border-radius:28px;padding:24px;position:relative;overflow:hidden;box-shadow:0 2px 0 rgba(43,33,24,.07);transition:transform .35s cubic-bezier(.3,1.5,.5,1);animation:pop .7s both}
+.tile:hover{transform:translateY(-6px) rotate(-.6deg)}
+@keyframes pop{from{opacity:0;transform:translateY(24px) scale(.96)}}
+.tile:nth-child(2){animation-delay:.08s}.tile:nth-child(3){animation-delay:.16s}.tile:nth-child(4){animation-delay:.24s}.tile:nth-child(5){animation-delay:.32s}.tile:nth-child(6){animation-delay:.4s}.tile:nth-child(7){animation-delay:.48s}.tile:nth-child(8){animation-delay:.56s}
+.k{font:700 11px 'DM Sans';letter-spacing:.14em;text-transform:uppercase;opacity:.6}
+.blob{position:absolute;border-radius:50%;opacity:.55;filter:blur(2px)}
+.form{background:#fff}
+.form h2{font:800 28px Fraunces;margin-bottom:14px}
+.f{margin-bottom:14px}.f label{display:block;font-weight:700;font-size:12px;margin-bottom:6px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:2px solid var(--ink);border-radius:99px;padding:7px 14px;background:transparent;font:700 13px 'DM Sans';cursor:pointer;transition:.2s}
+.chip.sel{background:var(--ink);color:var(--cream)}
+input{width:100%;border:2px solid #eadccf;border-radius:16px;padding:11px 14px;font:500 15px 'DM Sans';background:var(--cream);outline:none}
+input:focus{border-color:var(--tomato)}
+.save{width:100%;border:0;border-radius:99px;background:var(--tomato);color:#fff;font:700 16px 'DM Sans';padding:14px;cursor:pointer;transition:.2s}
+.save:hover{transform:scale(1.03)}
+.race{background:var(--peach);min-height:300px}
+.race .big{font:800 clamp(90px,14vw,150px)/.85 Fraunces;letter-spacing:-.06em;margin:18px 0 8px;position:relative}
+.race .blob{width:200px;height:200px;background:var(--butter);right:-50px;bottom:-60px}
+.count{background:var(--ink);color:var(--cream);text-align:center}
+.count b{display:block;font:800 88px/1 Fraunces;color:var(--butter)}
+.pace{background:var(--sky)}.pace b{font:800 64px/1 Fraunces;display:block;margin:10px 0}
+.tip{background:var(--rose);font:italic 600 21px/1.35 Fraunces}
+.wk{background:var(--sage)}.wk b{font:800 54px/1 Fraunces}
+.run{display:flex;gap:16px;align-items:center}
+.run .n{font:800 52px/1 Fraunces;min-width:70px}
+.run small{display:block;opacity:.65}
+.run.t1{background:var(--butter)}.run.t2{background:var(--sky)}.run.t3{background:var(--sage)}.run.t4{background:var(--peach)}
+.tag{display:inline-block;margin-top:8px;padding:3px 10px;border-radius:99px;background:rgba(43,33,24,.1);font:700 11px 'DM Sans'}
+</style>
+</head>
+<body>
+<nav><div class="logo">last<i>.</i>mile</div><div class="search">Search your runs…</div><div class="avatar">A</div></nav>
+<header><h1>Last <em>Mile</em></h1><p>Tell us about yourself and we'll build your first two weeks.</p></header>
+
+<div class="masonry">
+  <div class="tile form">
+    <h2>Onboarding</h2>
+    <div class="f"><label>Your goal</label><div class="chips" data-s><button class="chip">5K</button><button class="chip sel">10K</button><button class="chip">21K</button><button class="chip">Marathon</button></div></div>
+    <div class="f"><label>Race date</label><input type="date" value="2027-01-24"></div>
+    <div class="f"><label>Goal pace (min/km)</label><input value="5:30"></div>
+    <div class="f"><label>Running history</label><div class="chips" data-s><button class="chip">Beginner</button><button class="chip sel">Intermediate</button><button class="chip">Advanced</button></div></div>
+    <div class="f"><label>Any injury?</label><input placeholder="Knee pain, etc."></div>
+    <button class="save">Build my plan →</button>
+  </div>
+
+  <div class="tile race"><span class="k">Race day · Sun 24 Jan 2027</span><div class="big">10K</div><span class="k">Intermediate runner</span><div class="blob"></div></div>
+  <div class="tile count"><span class="k">days to go</span><b id="days">94</b><span class="k">that's 14 weeks</span></div>
+  <div class="tile pace"><span class="k">Goal pace</span><b>5:30</b><span class="k">per kilometre</span></div>
+  <div class="tile tip">“Easy days easy, long day long. The magic is in the rest.”</div>
+  <div class="tile wk"><span class="k">Week 1</span><br><b>22 km</b><br><span class="k">4 runs · Z2 base</span></div>
+  <div class="tile run t1"><div class="n">5</div><div><b>Tuesday easy run</b><small>6:30–7:00 /km · ~34 min</small><span class="tag">Zone 2</span></div></div>
+  <div class="tile run t2"><div class="n">5</div><div><b>Thursday easy run</b><small>6:30–7:00 /km · ~34 min</small><span class="tag">Zone 2</span></div></div>
+  <div class="tile run t3"><div class="n">4</div><div><b>Saturday shake-out</b><small>6:30–7:00 /km · ~27 min</small><span class="tag">Zone 2</span></div></div>
+  <div class="tile run t4"><div class="n">8</div><div><b>Sunday long run</b><small>6:45–7:15 /km · ~56 min</small><span class="tag">Long slow</span></div></div>
+</div>
+<script>
+document.getElementById('days').textContent=Math.max(0,Math.ceil((new Date('2027-01-24')-new Date())/864e5));
+document.querySelectorAll('[data-s]').forEach(g=>g.onclick=e=>{if(!e.target.classList.contains('chip'))return;g.querySelectorAll('.chip').forEach(c=>c.classList.remove('sel'));e.target.classList.add('sel')});
+</script>
+</body>
+</html>

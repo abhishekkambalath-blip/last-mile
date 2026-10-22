@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Last Mile · Aurora</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#05070a;--glass:rgba(255,255,255,.04);--line:rgba(255,255,255,.1);--ink:#f4f7f5;--sub:#8b98a5;--lime:#bef264;--teal:#2dd4bf;--sky:#38bdf8}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:Sora,system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
+/* aurora blobs + grid, Aceternity style */
+.aurora{position:fixed;inset:0;z-index:-1;overflow:hidden}
+.aurora i{position:absolute;width:55vw;height:55vw;border-radius:50%;filter:blur(90px);opacity:.35;animation:drift 18s ease-in-out infinite alternate}
+.aurora i:nth-child(1){background:var(--teal);top:-20vw;left:-10vw}
+.aurora i:nth-child(2){background:var(--lime);bottom:-25vw;right:-10vw;animation-delay:-6s;opacity:.22}
+.aurora i:nth-child(3){background:var(--sky);top:30vh;left:40vw;width:30vw;height:30vw;animation-delay:-11s;opacity:.18}
+@keyframes drift{to{transform:translate(8vw,6vw) scale(1.2)}}
+.grid{position:fixed;inset:0;z-index:-1;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:56px 56px;mask-image:radial-gradient(ellipse at 50% 20%,#000 20%,transparent 70%);opacity:.5}
+nav{display:flex;justify-content:space-between;align-items:center;max-width:1040px;margin:0 auto;padding:20px 24px}
+.logo{font-weight:800;letter-spacing:.18em;font-size:13px;text-transform:uppercase}
+.logo b{color:var(--lime)}
+.pill{font:600 11px 'JetBrains Mono';padding:6px 12px;border:1px solid var(--line);border-radius:99px;background:var(--glass);backdrop-filter:blur(10px)}
+.pill.on{color:var(--lime);border-color:rgba(190,242,100,.4)}
+main{max-width:1040px;margin:0 auto;padding:0 24px 80px}
+h1{font-size:clamp(48px,9vw,104px);font-weight:800;line-height:.95;text-align:center;margin:40px 0 14px;letter-spacing:-.04em;background:linear-gradient(180deg,#fff 30%,#8fa3a0);-webkit-background-clip:text;background-clip:text;color:transparent}
+h1 span{background:linear-gradient(90deg,var(--lime),var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
+.tag{text-align:center;color:var(--sub);margin-bottom:48px}
+.card{position:relative;border:1px solid var(--line);background:var(--glass);backdrop-filter:blur(14px);border-radius:24px;padding:24px;overflow:hidden;transition:transform .3s,border-color .3s}
+.card:hover{transform:translateY(-3px);border-color:rgba(190,242,100,.35)}
+/* spotlight that follows the cursor */
+.card::before{content:"";position:absolute;inset:0;background:radial-gradient(360px circle at var(--x,50%) var(--y,0%),rgba(190,242,100,.12),transparent 60%);opacity:0;transition:.3s;pointer-events:none}
+.card:hover::before{opacity:1}
+.lbl{font:600 10px 'JetBrains Mono';letter-spacing:.2em;text-transform:uppercase;color:var(--sub);margin-bottom:10px;display:block}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{padding:10px 18px;border-radius:99px;border:1px solid var(--line);background:transparent;color:var(--ink);font:600 14px Sora;cursor:pointer;transition:.2s}
+.chip:hover{border-color:var(--teal)}
+.chip.sel{background:linear-gradient(90deg,var(--lime),var(--teal));color:#041014;border-color:transparent}
+.form{max-width:640px;margin:0 auto 90px;display:grid;gap:22px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+input{width:100%;padding:13px 14px;border-radius:14px;border:1px solid var(--line);background:rgba(0,0,0,.35);color:var(--ink);font:400 15px 'JetBrains Mono';outline:none}
+input:focus{border-color:var(--lime);box-shadow:0 0 0 3px rgba(190,242,100,.15)}
+.cta{border:0;border-radius:16px;padding:16px;font:800 15px Sora;letter-spacing:.06em;text-transform:uppercase;color:#041014;background:linear-gradient(90deg,var(--lime),var(--teal));cursor:pointer;position:relative;overflow:hidden}
+.cta::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.6) 50%,transparent 70%);transform:translateX(-100%);animation:shine 3s infinite}
+@keyframes shine{to{transform:translateX(100%)}}
+/* bento */
+.bento{display:grid;grid-template-columns:repeat(6,1fr);gap:16px}
+.hero{grid-column:span 4;display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
+.big{font-size:clamp(64px,10vw,112px);font-weight:800;letter-spacing:-.05em;line-height:.9;background:linear-gradient(90deg,var(--lime),var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
+.mono{font-family:'JetBrains Mono'}
+.dial{width:150px;height:150px;position:relative}
+.dial svg{transform:rotate(-90deg)}
+.dial div{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.dial b{font:600 26px 'JetBrains Mono'}
+.dial small{font:10px 'JetBrains Mono';color:var(--sub);letter-spacing:.14em}
+.cd{grid-column:span 2;text-align:center;display:grid;place-content:center}
+.cd b{font:600 52px 'JetBrains Mono';color:var(--lime)}
+.stat{grid-column:span 2}
+.stat b{font-size:40px;font-weight:800}
+.stat span{color:var(--sub);font-size:13px;margin-left:4px}
+.week{grid-column:span 6}
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin-top:6px}
+.day{border:1px solid var(--line);border-radius:16px;padding:12px 10px;min-height:150px;display:flex;flex-direction:column;justify-content:flex-end;background:rgba(0,0,0,.25);position:relative;overflow:hidden}
+.day small{position:absolute;top:10px;left:10px;font:10px 'JetBrains Mono';color:var(--sub);letter-spacing:.14em}
+.day .bar{border-radius:8px;margin-bottom:8px;transform-origin:bottom;animation:grow 1s cubic-bezier(.2,.8,.2,1) both}
+@keyframes grow{from{transform:scaleY(0)}}
+.day b{font-size:22px}.day em{font:normal 10px 'JetBrains Mono';color:var(--sub)}
+.rest{opacity:.45;justify-content:center;align-items:center;text-align:center;font:10px 'JetBrains Mono';letter-spacing:.14em;color:var(--sub)}
+.tabs{display:flex;gap:6px;margin-bottom:14px}
+@media(max-width:760px){.bento>*{grid-column:span 6!important}.days{grid-template-columns:repeat(4,1fr)}.row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="aurora"><i></i><i></i><i></i></div><div class="grid"></div>
+<nav><div class="logo">Last <b>Mile</b></div><div style="display:flex;gap:8px"><span class="pill on">10K</span><span class="pill" id="d">94D</span></div></nav>
+<main>
+  <h1>Last <span>Mile</span></h1>
+  <p class="tag">Tell us about yourself and we'll build your first two weeks.</p>
+
+  <section class="card form">
+    <div><span class="lbl">Your goal</span><div class="chips" data-single>
+      <button class="chip">5K</button><button class="chip sel">10K</button><button class="chip">21K</button><button class="chip">Marathon</button></div></div>
+    <div class="row"><div><span class="lbl">Race date</span><input value="2027-01-24" type="date"></div><div><span class="lbl">Goal pace /km</span><input value="5:30"></div></div>
+    <div><span class="lbl">Running history</span><div class="chips" data-single>
+      <button class="chip">Beginner</button><button class="chip sel">Intermediate</button><button class="chip">Advanced</button></div></div>
+    <div><span class="lbl">Any injury?</span><input placeholder="e.g. Knee pain after my first 10K"></div>
+    <button class="cta">Build my plan</button>
+  </section>
+
+  <div class="bento">
+    <div class="card hero">
+      <div><span class="lbl">Race day · Sun 24 Jan 2027</span><div class="big">10K</div><span class="lbl" style="margin-top:12px">Intermediate runner</span></div>
+      <div class="dial"><svg width="150" height="150"><circle cx="75" cy="75" r="64" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="10"/><circle cx="75" cy="75" r="64" fill="none" stroke="url(#g)" stroke-width="10" stroke-linecap="round" stroke-dasharray="402" stroke-dashoffset="150"><animate attributeName="stroke-dashoffset" from="402" to="150" dur="1.4s" fill="freeze"/></circle><defs><linearGradient id="g"><stop stop-color="#bef264"/><stop offset="1" stop-color="#2dd4bf"/></linearGradient></defs></svg><div><b>5:30</b><small>GOAL PACE</small></div></div>
+    </div>
+    <div class="card cd"><span class="lbl">Days to go</span><b id="days">94</b></div>
+    <div class="card stat"><span class="lbl">Week 1</span><b>22</b><span>km</span></div>
+    <div class="card stat"><span class="lbl">Week 2</span><b>24</b><span>km</span></div>
+    <div class="card stat"><span class="lbl">Runs</span><b>8</b><span>sessions</span></div>
+    <div class="card week"><span class="lbl">Week 1 · Z2 aerobic base</span>
+      <div class="days">
+        <div class="day rest">MON<br>REST</div>
+        <div class="day"><small>TUE</small><div class="bar" style="height:62px;background:linear-gradient(#38bdf8,#2dd4bf)"></div><b>5</b><em>km · 6:30</em></div>
+        <div class="day rest">WED<br>REST</div>
+        <div class="day"><small>THU</small><div class="bar" style="height:62px;background:linear-gradient(#38bdf8,#2dd4bf)"></div><b>5</b><em>km · 6:30</em></div>
+        <div class="day rest">FRI<br>REST</div>
+        <div class="day"><small>SAT</small><div class="bar" style="height:50px;background:linear-gradient(#38bdf8,#2dd4bf)"></div><b>4</b><em>km · 6:30</em></div>
+        <div class="day"><small>SUN</small><div class="bar" style="height:100px;background:linear-gradient(#bef264,#2dd4bf)"></div><b>8</b><em>km · long</em></div>
+      </div></div>
+  </div>
+</main>
+<script>
+const d=Math.max(0,Math.ceil((new Date('2027-01-24')-new Date())/864e5));document.getElementById('days').textContent=d;document.getElementById('d').textContent=d+'D';
+document.querySelectorAll('[data-single]').forEach(g=>g.addEventListener('click',e=>{if(!e.target.classList.contains('chip'))return;g.querySelectorAll('.chip').forEach(c=>c.classList.remove('sel'));e.target.classList.add('sel')}));
+document.querySelectorAll('.card').forEach(c=>c.addEventListener('pointermove',e=>{const r=c.getBoundingClientRect();c.style.setProperty('--x',e.clientX-r.left+'px');c.style.setProperty('--y',e.clientY-r.top+'px')}));
+</script>
+</body>
+</html>

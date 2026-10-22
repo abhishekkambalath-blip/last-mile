@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Last Mile · Editorial</title>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,500;1,6..72,300;1,6..72,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#f4efe6;--ink:#1b1b18;--sub:#6f6a5e;--rule:#cfc8b8;--green:#1f4d3a;--rust:#b5502b}
+*{box-sizing:border-box;margin:0}
+body{background:var(--paper);color:var(--ink);font:16px/1.6 Newsreader,Georgia,serif}
+.wrap{max-width:960px;margin:0 auto;padding:0 28px 100px}
+header{display:flex;justify-content:space-between;align-items:baseline;padding:22px 0;border-bottom:1px solid var(--ink)}
+.logo{font:500 22px Newsreader;letter-spacing:.02em;font-style:italic}
+.meta{font:500 11px Inter;letter-spacing:.16em;text-transform:uppercase;color:var(--sub)}
+.masthead{text-align:center;padding:70px 0 40px;border-bottom:1px solid var(--rule)}
+.kicker{font:600 11px Inter;letter-spacing:.3em;text-transform:uppercase;color:var(--rust);margin-bottom:18px}
+h1{font:300 clamp(64px,13vw,150px)/.9 Newsreader;letter-spacing:-.03em}
+h1 i{font-weight:500;color:var(--green)}
+.dek{font:italic 300 22px Newsreader;color:var(--sub);margin-top:18px}
+.fade{animation:f 1.2s both}.d2{animation-delay:.2s}.d3{animation-delay:.4s}
+@keyframes f{from{opacity:0;transform:translateY(14px)}}
+.two{display:grid;grid-template-columns:260px 1fr;gap:56px;padding:46px 0;border-bottom:1px solid var(--rule)}
+.sec h2{font:500 11px Inter;letter-spacing:.24em;text-transform:uppercase;color:var(--rust)}
+.sec p{font-size:15px;color:var(--sub);margin-top:10px}
+.f{margin-bottom:26px}
+.f label{display:block;font:600 10px Inter;letter-spacing:.2em;text-transform:uppercase;color:var(--sub)}
+input{width:100%;border:0;border-bottom:1px solid var(--ink);background:transparent;padding:8px 0;font:300 26px Newsreader;outline:none;color:var(--ink);transition:.2s}
+input:focus{border-color:var(--rust)}
+input::placeholder{color:#b3ab98;font-style:italic}
+.opts{display:flex;gap:26px;margin-top:8px;flex-wrap:wrap}
+.opt{font:300 24px Newsreader;border:0;background:transparent;color:#a39c8a;cursor:pointer;padding:0 0 3px;border-bottom:2px solid transparent;transition:.2s}
+.opt:hover{color:var(--ink)}
+.opt.sel{color:var(--ink);border-color:var(--rust);font-style:italic}
+.go{margin-top:6px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);padding:14px 30px;font:600 12px Inter;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;transition:.25s}
+.go:hover{background:var(--green);border-color:var(--green)}
+.facts{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--rule)}
+.fact{padding:34px 0;border-right:1px solid var(--rule);text-align:center}.fact:last-child{border:0}
+.fact b{display:block;font:300 62px/1 Newsreader;letter-spacing:-.03em}
+.fact span{font:600 10px Inter;letter-spacing:.2em;text-transform:uppercase;color:var(--sub)}
+.fact:first-child b{color:var(--rust);font-style:italic}
+.plan{padding-top:40px}
+.plan h3{font:300 36px Newsreader;margin-bottom:6px}.plan h3 i{color:var(--green)}
+.line{display:grid;grid-template-columns:70px 1fr 90px;gap:20px;align-items:baseline;padding:18px 0;border-bottom:1px solid var(--rule);transition:.25s}
+.line:hover{padding-left:14px;background:linear-gradient(90deg,rgba(31,77,58,.07),transparent)}
+.line .day{font:600 11px Inter;letter-spacing:.2em;text-transform:uppercase;color:var(--sub)}
+.line .t{font:500 22px Newsreader}.line .t small{display:block;font:300 italic 16px Newsreader;color:var(--sub)}
+.line .km{font:300 40px Newsreader;text-align:right}.line .km small{font:600 10px Inter;color:var(--sub);letter-spacing:.14em}
+.line.rest{opacity:.45}.line.rest .t{font-style:italic;font-weight:300}
+.pull{margin:50px 0 0;padding:30px 0;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);font:italic 300 30px/1.3 Newsreader;text-align:center;color:var(--green)}
+@media(max-width:760px){.two{grid-template-columns:1fr;gap:20px}.facts{grid-template-columns:1fr 1fr}.fact{border-bottom:1px solid var(--rule)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><span class="logo">Last Mile</span><span class="meta">10K · <span id="d">94</span> days out · Issue 01</span></header>
+  <div class="masthead"><div class="kicker fade">A training journal</div><h1 class="fade d2">Last <i>Mile</i></h1><p class="dek fade d3">Tell us about yourself, and we'll write your first two weeks.</p></div>
+
+  <section class="two"><div class="sec"><h2>01 · Onboarding</h2><p>Five questions. Honest answers make a better plan.</p></div>
+    <div>
+      <div class="f"><label>Your goal</label><div class="opts" data-s><button class="opt">5K</button><button class="opt sel">10K</button><button class="opt">21K</button><button class="opt">Marathon</button></div></div>
+      <div class="f"><label>Race date</label><input type="date" value="2027-01-24"></div>
+      <div class="f"><label>Goal pace (min per km)</label><input value="5:30"></div>
+      <div class="f"><label>Running history</label><div class="opts" data-s><button class="opt">Beginner</button><button class="opt sel">Intermediate</button><button class="opt">Advanced</button></div></div>
+      <div class="f"><label>Any injury?</label><input placeholder="Leave blank if none"></div>
+      <button class="go">Build my plan</button>
+    </div></section>
+
+  <section class="facts"><div class="fact"><b>10K</b><span>Race</span></div><div class="fact"><b>5:30</b><span>Goal pace</span></div><div class="fact"><b>22</b><span>Week 1 · km</span></div><div class="fact"><b>24</b><span>Week 2 · km</span></div></section>
+
+  <section class="plan"><div class="sec" style="margin-bottom:10px"><h2>02 · The blueprint</h2></div>
+    <h3>Week one — <i>building the base</i></h3>
+    <div class="line rest"><span class="day">Mon</span><span class="t">Rest</span><span></span></div>
+    <div class="line"><span class="day">Tue</span><span class="t">Easy run<small>6:30–7:00 per km · conversational</small></span><span class="km">5<small> KM</small></span></div>
+    <div class="line rest"><span class="day">Wed</span><span class="t">Rest</span><span></span></div>
+    <div class="line"><span class="day">Thu</span><span class="t">Easy run<small>6:30–7:00 per km · relaxed cadence</small></span><span class="km">5<small> KM</small></span></div>
+    <div class="line rest"><span class="day">Fri</span><span class="t">Rest</span><span></span></div>
+    <div class="line"><span class="day">Sat</span><span class="t">Shake-out<small>6:30–7:00 per km · keep it light</small></span><span class="km">4<small> KM</small></span></div>
+    <div class="line"><span class="day">Sun</span><span class="t">Long run<small>6:45–7:15 per km · settle in</small></span><span class="km">8<small> KM</small></span></div>
+    <p class="pull">“Easy days easy, the long day long — and the rest is where you get faster.”</p>
+  </section>
+</div>
+<script>
+document.getElementById('d').textContent=Math.max(0,Math.ceil((new Date('2027-01-24')-new Date())/864e5));
+document.querySelectorAll('[data-s]').forEach(g=>g.onclick=e=>{if(!e.target.classList.contains('opt'))return;g.querySelectorAll('.opt').forEach(c=>c.classList.remove('sel'));e.target.classList.add('sel')});
+</script>
+</body>
+</html>

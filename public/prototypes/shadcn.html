@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Last Mile · Shadcn</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fff;--fg:#09090b;--muted:#71717a;--card:#fff;--border:#e4e4e7;--accent:#f4f4f5;--primary:#18181b;--primary-fg:#fafafa;--green:#16a34a;--blue:#2563eb;--amber:#d97706;--radius:10px}
+.dark{--bg:#09090b;--fg:#fafafa;--muted:#a1a1aa;--card:#09090b;--border:#27272a;--accent:#18181b;--primary:#fafafa;--primary-fg:#18181b}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--fg);font:14px/1.5 Inter,system-ui,sans-serif;transition:background .2s}
+.wrap{max-width:880px;margin:0 auto;padding:0 20px 80px}
+header{display:flex;align-items:center;justify-content:space-between;height:56px;border-bottom:1px solid var(--border);padding:0 20px}
+header .l{font-weight:700;letter-spacing:-.02em;display:flex;align-items:center;gap:8px}
+.dot{width:20px;height:20px;border-radius:6px;background:var(--primary)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:36px;padding:0 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--fg);font:500 14px Inter;cursor:pointer;transition:.15s}
+.btn:hover{background:var(--accent)}
+.btn.p{background:var(--primary);color:var(--primary-fg);border-color:var(--primary)}
+.btn.p:hover{opacity:.9;background:var(--primary)}
+.badge{display:inline-flex;padding:2px 10px;border-radius:99px;border:1px solid var(--border);font:500 12px Inter}
+.badge.g{background:rgba(22,163,74,.1);color:var(--green);border-color:rgba(22,163,74,.25)}
+.badge.b{background:rgba(37,99,235,.1);color:var(--blue);border-color:rgba(37,99,235,.25)}
+.badge.a{background:rgba(217,119,6,.1);color:var(--amber);border-color:rgba(217,119,6,.25)}
+h1{font-size:44px;font-weight:700;letter-spacing:-.04em;text-align:center;margin:56px 0 6px}
+.sub{text-align:center;color:var(--muted);margin-bottom:36px}
+.card{border:1px solid var(--border);border-radius:var(--radius);background:var(--card);box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.ch{padding:20px 20px 0}.ch h2{font-size:16px;font-weight:600;letter-spacing:-.01em}.ch p{color:var(--muted);font-size:13px}
+.cc{padding:20px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+label{display:block;font-weight:500;font-size:13px;margin-bottom:6px}
+input,select{width:100%;height:36px;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--fg);padding:0 12px;font:14px Inter;outline:none;transition:.15s}
+input:focus,select:focus{border-color:var(--fg);box-shadow:0 0 0 3px rgba(113,113,122,.2)}
+.stack{display:grid;gap:16px}
+.form{max-width:520px;margin:0 auto 56px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px}
+.stat .cc{padding:16px}.stat small{color:var(--muted);font-size:12px;font-weight:500}.stat b{display:block;font-size:28px;letter-spacing:-.03em;font-weight:700;font-family:'Geist Mono',monospace}
+.tabs{display:inline-flex;background:var(--accent);padding:4px;border-radius:8px;margin-bottom:16px}
+.tabs button{border:0;background:transparent;color:var(--muted);font:500 13px Inter;padding:6px 14px;border-radius:6px;cursor:pointer}
+.tabs button.on{background:var(--bg);color:var(--fg);box-shadow:0 1px 2px rgba(0,0,0,.1)}
+table{width:100%;border-collapse:collapse}
+th{font:500 12px Inter;color:var(--muted);text-align:left;padding:10px 16px;border-bottom:1px solid var(--border)}
+td{padding:12px 16px;border-bottom:1px solid var(--border);font-size:14px}
+tr:last-child td{border:0}tr:hover td{background:var(--accent)}
+.mono{font-family:'Geist Mono',monospace;font-size:13px}
+.prog{height:8px;background:var(--accent);border-radius:99px;overflow:hidden;margin-top:6px}
+.prog i{display:block;height:100%;background:var(--primary);border-radius:99px;width:0;transition:width 1s cubic-bezier(.2,.8,.2,1)}
+.panel{display:none;animation:in .3s}.panel.on{display:block}
+@keyframes in{from{opacity:0;transform:translateY(6px)}}
+@media(max-width:700px){.stats{grid-template-columns:1fr 1fr}.grid2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="l"><span class="dot"></span>Last Mile</div><div style="display:flex;gap:8px;align-items:center"><span class="badge">10K</span><span class="badge g" id="d">94 days</span><button class="btn" id="theme">Toggle theme</button></div></header>
+<div class="wrap">
+  <h1>Last Mile</h1><p class="sub">Tell us about yourself and we'll build your first two weeks.</p>
+
+  <div class="card form"><div class="ch"><h2>Onboarding</h2><p>A few details so we can personalise your plan.</p></div>
+    <div class="cc stack">
+      <div class="grid2"><div><label>Your goal</label><select><option>5K</option><option selected>10K</option><option>21K</option><option>Marathon</option></select></div>
+      <div><label>Race date</label><input type="date" value="2027-01-24"></div></div>
+      <div><label>Goal pace (min/km)</label><input value="5:30" class="mono"></div>
+      <div><label>Running history</label><select><option>Beginner</option><option selected>Intermediate</option><option>Advanced</option></select></div>
+      <div><label>Any injury?</label><input placeholder="Leave blank if none"></div>
+      <button class="btn p" style="height:40px">Build my plan</button>
+    </div></div>
+
+  <div class="stats">
+    <div class="card stat"><div class="cc"><small>Goal</small><b>10K</b></div></div>
+    <div class="card stat"><div class="cc"><small>Goal pace</small><b>5:30</b></div></div>
+    <div class="card stat"><div class="cc"><small>Week 1</small><b>22 km</b></div></div>
+    <div class="card stat"><div class="cc"><small>Week 2</small><b>24 km</b></div></div>
+  </div>
+
+  <div class="tabs" id="tabs"><button class="on" data-t="o">Overview</button><button data-t="w">Key workouts</button><button data-t="g">Week grid</button></div>
+
+  <div class="panel on" id="o"><div class="card"><div class="ch"><h2>Coach's notes</h2><p>14 weeks to race day · Base Build phase</p></div><div class="cc">
+    <p>Four weekly sessions build a consistent aerobic base, with a long run on Sunday and rest days protected between hard efforts.</p>
+    <div style="margin-top:20px"><div style="display:flex;justify-content:space-between"><span>Week 1</span><span class="mono">22 km</span></div><div class="prog"><i data-w="92"></i></div></div>
+    <div style="margin-top:14px"><div style="display:flex;justify-content:space-between"><span>Week 2</span><span class="mono">24 km</span></div><div class="prog"><i data-w="100"></i></div></div>
+  </div></div></div>
+
+  <div class="panel" id="w"><div class="card"><table>
+    <tr><th>Day</th><th>Session</th><th>Distance</th><th>Pace</th><th>Zone</th></tr>
+    <tr><td>Tue</td><td>Easy run</td><td class="mono">5 km</td><td class="mono">6:30–7:00</td><td><span class="badge b">Z2</span></td></tr>
+    <tr><td>Thu</td><td>Easy run</td><td class="mono">5 km</td><td class="mono">6:30–7:00</td><td><span class="badge b">Z2</span></td></tr>
+    <tr><td>Sat</td><td>Recovery jog</td><td class="mono">4 km</td><td class="mono">6:30–7:00</td><td><span class="badge b">Z2</span></td></tr>
+    <tr><td>Sun</td><td>Long run</td><td class="mono">8 km</td><td class="mono">6:45–7:15</td><td><span class="badge a">Long</span></td></tr>
+  </table></div></div>
+
+  <div class="panel" id="g"><div class="card"><div class="cc" style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;text-align:center">
+    <div><small>Mon</small><br><span class="badge">Rest</span></div><div><small>Tue</small><br><span class="badge g">5 km</span></div><div><small>Wed</small><br><span class="badge">Rest</span></div><div><small>Thu</small><br><span class="badge g">5 km</span></div><div><small>Fri</small><br><span class="badge">Rest</span></div><div><small>Sat</small><br><span class="badge g">4 km</span></div><div><small>Sun</small><br><span class="badge a">8 km</span></div>
+  </div></div></div>
+</div>
+<script>
+const d=Math.max(0,Math.ceil((new Date('2027-01-24')-new Date())/864e5));document.getElementById('d').textContent=d+' days';
+document.getElementById('theme').onclick=()=>document.body.classList.toggle('dark');
+document.getElementById('tabs').onclick=e=>{const t=e.target.dataset.t;if(!t)return;document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b===e.target));document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('on',p.id===t))};
+setTimeout(()=>document.querySelectorAll('.prog i').forEach(i=>i.style.width=i.dataset.w+'%'),200);
+</script>
+</body>
+</html>

@@ -1,0 +1,153 @@
+@import "tailwindcss";
+
+/*
+ * Aurora theme: near-black base, glass cards, lime-to-teal glow.
+ * Token names are kept from the earlier theme so every screen picks the new look up from here.
+ * `volt` is now the lime accent.
+ */
+:root {
+  --void: #05070a;
+  --carbon: rgba(0, 0, 0, 0.35); /* inputs and inset panels */
+  --elevated: rgba(255, 255, 255, 0.04); /* glass cards */
+  --line: rgba(255, 255, 255, 0.1);
+  --volt: #bef264;
+  --teal: #2dd4bf;
+  --aerobic: #38bdf8;
+  --threshold: #f97316;
+  --vo2: #ef4444;
+  --ink: #f4f7f5;
+  --subtext: #8b98a5;
+  --muted: #6b7886;
+}
+
+@theme inline {
+  --color-void: var(--void);
+  --color-carbon: var(--carbon);
+  --color-elevated: var(--elevated);
+  --color-line: var(--line);
+  --color-volt: var(--volt);
+  --color-teal: var(--teal);
+  --color-aerobic: var(--aerobic);
+  --color-threshold: var(--threshold);
+  --color-vo2: var(--vo2);
+  --color-ink: var(--ink);
+  --color-subtext: var(--subtext);
+  --color-muted: var(--muted);
+  --font-sans: var(--font-sora);
+  --font-athletic: var(--font-sora);
+  --font-mono-tech: var(--font-jetbrains), ui-monospace, monospace;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--void);
+  color: var(--ink);
+  font-family: var(--font-sora), system-ui, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Aurora glow and fading grid sit behind everything. */
+.aurora {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  overflow: hidden;
+  pointer-events: none;
+}
+.aurora i {
+  position: absolute;
+  width: 55vw;
+  height: 55vw;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.32;
+  animation: drift 18s ease-in-out infinite alternate;
+}
+.aurora i:nth-child(1) {
+  background: var(--teal);
+  top: -20vw;
+  left: -10vw;
+}
+.aurora i:nth-child(2) {
+  background: var(--volt);
+  bottom: -25vw;
+  right: -10vw;
+  opacity: 0.2;
+  animation-delay: -6s;
+}
+.aurora i:nth-child(3) {
+  background: var(--aerobic);
+  top: 30vh;
+  left: 40vw;
+  width: 30vw;
+  height: 30vw;
+  opacity: 0.16;
+  animation-delay: -11s;
+}
+.grid-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse at 50% 15%, #000 15%, transparent 70%);
+  opacity: 0.5;
+}
+@keyframes drift {
+  to {
+    transform: translate(8vw, 6vw) scale(1.2);
+  }
+}
+
+/* Glass cards: blur, plus a lime spotlight that follows the cursor (position set by Spotlight.tsx). */
+.bg-elevated {
+  backdrop-filter: blur(14px);
+  background-image: radial-gradient(360px circle at var(--x, 50%) var(--y, -60%), rgba(190, 242, 100, 0.1), transparent 60%);
+  transition: border-color 0.3s;
+}
+.bg-elevated:hover {
+  border-color: rgba(190, 242, 100, 0.3);
+}
+
+/* Gradient text helper for headlines and big numbers. */
+.text-aurora {
+  background: linear-gradient(90deg, var(--volt), var(--teal));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.text-chrome {
+  background: linear-gradient(180deg, #fff 30%, #8fa3a0);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Radar sweep used by the analysis screen. */
+@keyframes sweep {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
