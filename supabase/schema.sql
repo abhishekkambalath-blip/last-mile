@@ -49,3 +49,15 @@ create table if not exists oauth_states (
 );
 alter table device_connections enable row level security;
 alter table oauth_states enable row level security;
+
+-- Payments (Razorpay). Written only by the server; runners cannot touch these rows.
+create table if not exists payments (
+  order_id text primary key,
+  user_id uuid not null references auth.users on delete cascade,
+  amount_paise integer not null,
+  status text not null default 'created' check (status in ('created', 'paid')),
+  payment_id text,
+  created_at timestamptz not null default now(),
+  paid_at timestamptz
+);
+alter table payments enable row level security;

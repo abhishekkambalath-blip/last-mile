@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { FREE_WEEKS, PRICE_INR } from "@/lib/plan";
-import { setSubscribed } from "@/lib/subscription";
 
 export const priceLabel = `₹${PRICE_INR.toLocaleString("en-IN")}`;
 
 /**
  * The subscription prompt shown when a runner reaches a locked week.
- * Prototype: "Subscribe" only records the status (on the server when the backend is on). No payment is taken.
+ * "Subscribe" opens the subscription page, where the runner pays by UPI or card.
  */
 export default function PaywallDialog({
   open,
@@ -21,7 +21,7 @@ export default function PaywallDialog({
   totalWeeks: number;
   raceDate: string;
 }) {
-  const [failed, setFailed] = useState(false);
+  const router = useRouter();
   useEffect(() => {
     if (!open) return;
     const esc = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -63,12 +63,7 @@ export default function PaywallDialog({
           </ul>
         </div>
 
-        <p className="text-xs text-muted">Demo mode: no payment is taken in this prototype.</p>
-        {failed && (
-          <p role="alert" className="text-sm text-vo2">
-            We could not save your subscription. Try again.
-          </p>
-        )}
+        <p className="text-xs text-muted">You pay on the next screen, by UPI or card.</p>
 
         <div className="flex gap-3">
           <button type="button" autoFocus onClick={onClose} className="h-12 flex-1 rounded-full bg-carbon font-bold text-subtext hover:text-ink">
@@ -76,9 +71,9 @@ export default function PaywallDialog({
           </button>
           <button
             type="button"
-            onClick={async () => {
-              if (await setSubscribed(true)) onClose();
-              else setFailed(true);
+            onClick={() => {
+              onClose();
+              router.push("/subscribe");
             }}
             className="h-12 flex-[1.4] rounded-full bg-volt font-bold text-void hover:brightness-110"
           >

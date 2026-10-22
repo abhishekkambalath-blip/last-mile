@@ -6,7 +6,8 @@ import { accessToken, backendOn } from "@/lib/supabase";
 const KEY = "last-mile:subscription";
 const EVENT = "last-mile:subscription-changed";
 
-function setLocal(on: boolean) {
+/** Switches the flag in this browser. After a verified payment the server has already recorded it. */
+export function setSubscribedLocal(on: boolean) {
   try {
     if (on) localStorage.setItem(KEY, "active");
     else localStorage.removeItem(KEY);
@@ -21,7 +22,7 @@ function setLocal(on: boolean) {
  */
 export async function setSubscribed(on: boolean): Promise<boolean> {
   if (!backendOn) {
-    setLocal(on);
+    setSubscribedLocal(on);
     return true;
   }
   try {
@@ -32,7 +33,7 @@ export async function setSubscribed(on: boolean): Promise<boolean> {
       body: JSON.stringify({ status: on ? "active" : "free" }),
     });
     if (!res.ok) return false;
-    setLocal(on);
+    setSubscribedLocal(on);
     return true;
   } catch {
     return false;
