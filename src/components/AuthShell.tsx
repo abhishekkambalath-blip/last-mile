@@ -10,7 +10,7 @@ export default function AuthShell({ title, sub, children, footer }: { title: str
   return (
     <div className="flex flex-1 justify-center px-5 pb-10 pt-10">
       <main className="w-full max-w-md">
-        <p className="text-center text-xl font-extrabold tracking-tight">Last Mile</p>
+        <p className="text-center text-3xl font-extrabold leading-tight tracking-tight">Last Mile</p>
         <h1 className="mt-8 text-3xl font-extrabold leading-tight">{title}</h1>
         {sub && <p className="mt-2 text-base text-subtext">{sub}</p>}
         {!backendOn && (
