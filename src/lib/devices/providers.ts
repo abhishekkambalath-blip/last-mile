@@ -1,7 +1,7 @@
 // The fitness bands a runner can connect. Each one is an OAuth2 login plus a way to list recent running workouts.
 // Server only: this file reads the developer secrets from the environment.
 
-export type ProviderId = "whoop" | "polar" | "coros";
+export type ProviderId = "whoop" | "polar" | "strava" | "coros";
 export type ProviderState = "available" | "not-configured" | "coming-soon";
 
 export type Tokens = { accessToken: string; refreshToken?: string; expiresAt?: string; providerUserId?: string; scope?: string };
@@ -128,6 +128,59 @@ const polar: Provider = {
   },
 };
 
+// ---- Strava (open to any developer: developers.strava.com). Many bands (Garmin, COROS, Apple Watch...) sync to Strava. ----
+const STRAVA_AUTH = "https://www.strava.com/oauth/authorize";
+const STRAVA_TOKEN = "https://www.strava.com/api/v3/oauth/token";
+const STRAVA_API = "https://www.strava.com/api/v3";
+
+type StravaToken = { access_token: string; refresh_token?: string; expires_at?: number; scope?: string; athlete?: { id?: number } };
+const stravaTokens = (t: StravaToken): Tokens => ({
+  accessToken: t.access_token,
+  refreshToken: t.refresh_token,
+  expiresAt: t.expires_at ? new Date(t.expires_at * 1000).toISOString() : undefined, // Strava sends epoch seconds; tokens last 6 hours
+  providerUserId: t.athlete?.id !== undefined ? String(t.athlete.id) : undefined,
+  scope: t.scope,
+});
+
+const strava: Provider = {
+  id: "strava",
+  name: "Strava",
+  note: "Imports your runs from Strava, including runs that Garmin, COROS and other bands send there.",
+  state: () => (env("STRAVA_CLIENT_ID") && env("STRAVA_CLIENT_SECRET") ? "available" : "not-configured"),
+  authorizeUrl: (state, redirect) => `${STRAVA_AUTH}?${form({ client_id: env("STRAVA_CLIENT_ID"), redirect_uri: redirect, response_type: "code", approval_prompt: "auto", scope: "activity:read", state })}`,
+  exchange: async (code) =>
+    stravaTokens(
+      await json<StravaToken>(await fetch(STRAVA_TOKEN, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: form({ client_id: env("STRAVA_CLIENT_ID"), client_secret: env("STRAVA_CLIENT_SECRET"), code, grant_type: "authorization_code" }) })),
+    ),
+  // The refresh token can change on every refresh, so the new one must be saved straight away.
+  refresh: async (t) =>
+    stravaTokens({
+      ...(await json<StravaToken>(await fetch(STRAVA_TOKEN, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: form({ client_id: env("STRAVA_CLIENT_ID"), client_secret: env("STRAVA_CLIENT_SECRET"), grant_type: "refresh_token", refresh_token: t.refreshToken ?? "" }) }))),
+      athlete: t.providerUserId ? { id: Number(t.providerUserId) } : undefined,
+    }),
+  fetchRuns: async (t, since) => {
+    const out: ImportedRun[] = [];
+    const after = Math.floor(Date.parse(since) / 1000);
+    for (let page = 1; page <= 5; page++) {
+      const list = await json<{ id: number; sport_type?: string; type?: string; distance?: number; moving_time?: number; start_date?: string }[]>(
+        await fetch(`${STRAVA_API}/athlete/activities?${form({ after: String(after), per_page: "100", page: String(page) })}`, { headers: { Authorization: `Bearer ${t.accessToken}` } }),
+      );
+      for (const a of list) {
+        if (!isRun(a.sport_type ?? a.type) || !a.start_date) continue;
+        out.push({ externalId: String(a.id), start: a.start_date, distanceKm: (a.distance ?? 0) / 1000, durationSec: Math.round(a.moving_time ?? 0) });
+      }
+      if (list.length < 100) break;
+    }
+    return out.filter(sane);
+  },
+  revoke: async (t) => {
+    // Strava's newer revoke call first, then the older deauthorize call, which still works.
+    const basic = Buffer.from(`${env("STRAVA_CLIENT_ID")}:${env("STRAVA_CLIENT_SECRET")}`).toString("base64");
+    const res = await fetch("https://www.strava.com/oauth/revoke", { method: "POST", headers: { Authorization: `Basic ${basic}`, "Content-Type": "application/x-www-form-urlencoded" }, body: form({ token: t.accessToken }) }).catch(() => null);
+    if (!res || !res.ok) await fetch("https://www.strava.com/oauth/deauthorize", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: form({ access_token: t.accessToken }) });
+  },
+};
+
 // ---- COROS: the multi-user API is only for approved partners (apply at api@coros.com). Not wired yet. ----
 const coros: Provider = {
   id: "coros",
@@ -143,5 +196,5 @@ const coros: Provider = {
   fetchRuns: async () => [],
 };
 
-export const PROVIDERS: Record<ProviderId, Provider> = { whoop, polar, coros };
+export const PROVIDERS: Record<ProviderId, Provider> = { whoop, polar, strava, coros };
 export const providerOf = (id: string): Provider | null => (id in PROVIDERS ? PROVIDERS[id as ProviderId] : null);

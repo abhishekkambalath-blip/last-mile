@@ -66,6 +66,18 @@ export function pushAthleteSoon() {
 
 let pulled: Promise<void> | null = null;
 
+/** Forgets that a pull happened, so the next pullAll() reads the server again (after signing in as someone else). */
+export function resetSync() {
+  pulled = null;
+  clearTimeout(timer);
+}
+
+/** Removes this browser's copy of the runner's data: when someone signs out, or a different person signs in. */
+export function clearLocalData() {
+  for (const k of [PLAN_STORAGE_KEY, ACCOUNT_KEY, RUNS_KEY, SUB_KEY, STAMP_KEY]) set(k, null);
+  for (const e of Object.values(EVENTS)) window.dispatchEvent(new Event(e));
+}
+
 /** Brings the runner's saved data in from Supabase. Newer data wins; runs from both sides are kept. */
 export function pullAll(): Promise<void> {
   if (!backendOn) return Promise.resolve();

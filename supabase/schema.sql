@@ -35,7 +35,7 @@ create policy "read own subscription" on subscriptions for select using (auth.ui
 -- Fitness bands: tokens are encrypted by the server and can only be read with the service role (no policies on purpose).
 create table if not exists device_connections (
   user_id uuid not null references auth.users on delete cascade,
-  provider text not null check (provider in ('whoop', 'polar', 'coros')),
+  provider text not null check (provider in ('whoop', 'polar', 'strava', 'coros')),
   tokens text not null,               -- encrypted JSON
   connected_at timestamptz not null default now(),
   last_synced_at timestamptz,
@@ -61,3 +61,7 @@ create table if not exists payments (
   paid_at timestamptz
 );
 alter table payments enable row level security;
+
+-- If you ran this file before Strava was added, widen the allowed bands (safe to run again):
+alter table device_connections drop constraint if exists device_connections_provider_check;
+alter table device_connections add constraint device_connections_provider_check check (provider in ('whoop', 'polar', 'strava', 'coros'));

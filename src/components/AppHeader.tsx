@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import RunnerIcon from "@/components/RunnerIcon";
 import { useAccount } from "@/lib/account";
+import { signOut, useAuth } from "@/lib/auth";
 import { writeSaved } from "@/lib/store";
 import { useSubscribed } from "@/lib/subscription";
 
@@ -13,6 +14,7 @@ export default function AppHeader() {
   const router = useRouter();
   const path = usePathname();
   const account = useAccount();
+  const auth = useAuth();
   const subscribed = useSubscribed();
   const initial = account.name.trim().charAt(0).toUpperCase();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -45,7 +47,9 @@ export default function AppHeader() {
   }
 
   // The profile, subscription and devices pages have their own top bar.
-  if (path === "/profile" || path === "/subscribe" || path === "/devices") return null;
+  // The sign-in pages, and every page while nobody is signed in, have no app header either.
+  const authPage = ["/signin", "/signup", "/verify", "/forgot", "/reset"].includes(path);
+  if (path === "/profile" || path === "/subscribe" || path === "/devices" || authPage || auth.status === "loading" || auth.status === "out") return null;
 
   const itemCls = "flex min-h-11 w-full items-center gap-3 px-4 py-3 text-left text-sm font-semibold text-ink hover:bg-white/5";
   const iconCls = "h-5 w-5 text-subtext";
@@ -103,6 +107,26 @@ export default function AppHeader() {
                   </svg>
                   Start new plan
                 </button>
+                {auth.status === "in" && (
+                  <button
+                    role="menuitem"
+                    type="button"
+                    onClick={async () => {
+                      setMenuOpen(false);
+                      await signOut();
+                      router.replace("/signin");
+                    }}
+                    className={`${itemCls} border-t border-line`}
+                  >
+                    <svg {...svg} className={iconCls}>
+                      <path d="M9 4H5v16h4M16 8l4 4-4 4M20 12H9" />
+                    </svg>
+                    <span className="flex min-w-0 flex-col">
+                      <span>Sign out</span>
+                      <span className="truncate text-xs font-normal text-muted">{auth.email}</span>
+                    </span>
+                  </button>
+                )}
               </div>
             )}
           </div>

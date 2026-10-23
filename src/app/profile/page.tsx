@@ -1,10 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState, type ReactNode } from "react";
 import { PriceBadge } from "@/components/PriceBadge";
 import RunnerIcon from "@/components/RunnerIcon";
 import { saveAccount, useAccount, type Account } from "@/lib/account";
+import { signOut, useAuth } from "@/lib/auth";
+import { accessToken } from "@/lib/supabase";
 import { useSubscribed } from "@/lib/subscription";
 
 type Field = "name" | "email" | "dob" | "gender" | "injury";
@@ -69,6 +72,10 @@ function Editor({ onSave, onCancel, error, children }: { onSave: () => void; onC
 
 export default function ProfilePage() {
   const account = useAccount();
+  const auth = useAuth();
+  const router = useRouter();
+  const [deleting, setDeleting] = useState<"idle" | "confirm" | "busy">("idle");
+  const [deleteError, setDeleteError] = useState("");
   const subscribed = useSubscribed();
   const [open, setOpen] = useState<Field | null>(null);
   const [draft, setDraft] = useState("");
@@ -87,6 +94,20 @@ export default function ProfilePage() {
     if (field === "dob" && v && !(v < todayIso() && v > "1900-01-01")) return setError("Pick a date of birth in the past.");
     saveAccount({ [field]: v } as Partial<Account>);
     setOpen(null);
+  }
+
+  async function deleteAccount() {
+    setDeleting("busy");
+    setDeleteError("");
+    try {
+      const res = await fetch("/api/account", { method: "DELETE", headers: { Authorization: `Bearer ${await accessToken()}` } });
+      if (!res.ok) throw new Error(((await res.json().catch(() => ({}))) as { error?: string }).error ?? "We could not delete your account.");
+      await signOut();
+      router.replace("/signup");
+    } catch (e) {
+      setDeleteError((e as Error).message);
+      setDeleting("confirm");
+    }
   }
 
   const dobLabel = account.dob ? new Date(`${account.dob}T00:00:00`).toLocaleDateString(undefined, { day: "2-digit", month: "2-digit", year: "numeric" }) : "";
@@ -147,11 +168,21 @@ export default function ProfilePage() {
           </Editor>
         </Row>
 
-        <Row label="Email" value={account.email} placeholder="Add your email" open={open === "email"} onToggle={() => toggle("email")}>
-          <Editor onSave={() => save("email", draft)} onCancel={cancel} error={error}>
-            <input autoFocus type="email" inputMode="email" className={input} value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="you@example.com" aria-label="Email" />
-          </Editor>
-        </Row>
+        {auth.status === "in" ? (
+          <div>
+            <div className="px-1 pb-1.5 pt-5 text-xs font-bold uppercase tracking-wider text-muted">Email</div>
+            <div className="rounded-2xl border border-line bg-elevated px-4 py-4 text-base">
+              <span className="block truncate text-ink">{auth.email}</span>
+              <span className="mt-1 block text-xs text-muted">This is the email you sign in with.</span>
+            </div>
+          </div>
+        ) : (
+          <Row label="Email" value={account.email} placeholder="Add your email" open={open === "email"} onToggle={() => toggle("email")}>
+            <Editor onSave={() => save("email", draft)} onCancel={cancel} error={error}>
+              <input autoFocus type="email" inputMode="email" className={input} value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="you@example.com" aria-label="Email" />
+            </Editor>
+          </Row>
+        )}
 
         <Row label="Date of birth" value={dobLabel} placeholder="Select" open={open === "dob"} onToggle={() => toggle("dob")}>
           <Editor onSave={() => save("dob", draft)} onCancel={cancel} error={error}>
@@ -194,7 +225,38 @@ export default function ProfilePage() {
           </Editor>
         </Row>
 
-        <p className="mt-6 text-center text-xs text-muted">Your details are saved on this device only.</p>
+        {auth.status === "in" ? (
+          <section className="mt-10 rounded-2xl border border-line bg-elevated p-4" aria-labelledby="danger-title">
+            <h2 id="danger-title" className="text-sm font-bold uppercase tracking-wider text-muted">
+              Account
+            </h2>
+            <p className="mt-2 text-sm text-subtext">Signed in as {auth.email}.</p>
+            {deleting === "idle" ? (
+              <button type="button" onClick={() => setDeleting("confirm")} className="mt-3 h-11 rounded-full bg-carbon px-5 text-sm font-bold text-vo2 hover:brightness-125">
+                Delete my account
+              </button>
+            ) : (
+              <div className="mt-3 space-y-3">
+                <p className="text-sm text-ink">This permanently deletes your account, plan, runs and connected devices. It cannot be undone.</p>
+                {deleteError && (
+                  <p role="alert" className="text-sm text-vo2">
+                    {deleteError}
+                  </p>
+                )}
+                <div className="flex gap-3">
+                  <button type="button" disabled={deleting === "busy"} onClick={() => setDeleting("idle")} className="h-11 flex-1 rounded-full bg-carbon font-bold text-subtext hover:text-ink">
+                    Keep it
+                  </button>
+                  <button type="button" disabled={deleting === "busy"} onClick={deleteAccount} className="h-11 flex-1 rounded-full bg-[#b91c1c] font-bold text-white hover:brightness-110 disabled:opacity-60">
+                    {deleting === "busy" ? "Deleting…" : "Delete for good"}
+                  </button>
+                </div>
+              </div>
+            )}
+          </section>
+        ) : (
+          <p className="mt-6 text-center text-xs text-muted">Your details are saved on this device only.</p>
+        )}
       </main>
     </div>
   );

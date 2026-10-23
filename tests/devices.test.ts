@@ -70,3 +70,36 @@ test("a failing band answers with an error, not a half result", async () => {
   vi.stubGlobal("fetch", vi.fn(async () => reply({}, 401)));
   await expect(PROVIDERS.whoop.fetchRuns({ accessToken: "t" }, "2026-10-01T00:00:00Z")).rejects.toThrow();
 });
+
+test("Strava: only runs are imported, in km and seconds, and 'after' is sent as epoch seconds", async () => {
+  process.env.STRAVA_CLIENT_ID = "1";
+  process.env.STRAVA_CLIENT_SECRET = "s";
+  const fetchMock = vi.fn(async () =>
+    reply([
+      { id: 11, sport_type: "Run", distance: 8000, moving_time: 2400, start_date: "2026-10-20T01:00:00Z" },
+      { id: 12, sport_type: "TrailRun", distance: 12000, moving_time: 4800, start_date: "2026-10-19T01:00:00Z" },
+      { id: 13, sport_type: "Ride", distance: 30000, moving_time: 3600, start_date: "2026-10-18T01:00:00Z" },
+      { id: 14, sport_type: "Run", distance: 100, moving_time: 30, start_date: "2026-10-17T01:00:00Z" }, // too short to count
+    ]),
+  );
+  vi.stubGlobal("fetch", fetchMock);
+  const runs = await PROVIDERS.strava.fetchRuns({ accessToken: "t" }, "2026-10-01T00:00:00Z");
+  expect(runs.map((r) => [r.externalId, r.distanceKm, r.durationSec])).toEqual([
+    ["11", 8, 2400],
+    ["12", 12, 4800],
+  ]);
+  const called = new URL((fetchMock.mock.calls[0] as unknown as [string])[0]);
+  expect(called.searchParams.get("after")).toBe(String(Date.parse("2026-10-01T00:00:00Z") / 1000));
+});
+
+test("Strava: login address asks for activity:read, and token expiry comes from epoch seconds", async () => {
+  process.env.STRAVA_CLIENT_ID = "1";
+  process.env.STRAVA_CLIENT_SECRET = "s";
+  const u = new URL(PROVIDERS.strava.authorizeUrl("st", "https://app.test/api/devices/strava/callback"));
+  expect(u.origin + u.pathname).toBe("https://www.strava.com/oauth/authorize");
+  expect(u.searchParams.get("scope")).toBe("activity:read");
+  expect(u.searchParams.get("response_type")).toBe("code");
+  vi.stubGlobal("fetch", vi.fn(async () => reply({ access_token: "a", refresh_token: "r", expires_at: 1800000000, athlete: { id: 7 } })));
+  const t = await PROVIDERS.strava.exchange("code", "x");
+  expect(t).toMatchObject({ accessToken: "a", refreshToken: "r", providerUserId: "7", expiresAt: new Date(1800000000 * 1000).toISOString() });
+});

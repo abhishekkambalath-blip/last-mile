@@ -8,22 +8,20 @@ export const backendOn = Boolean(URL && ANON);
 
 let browser: SupabaseClient | null = null;
 
-/** The browser client. Signs the runner in anonymously the first time, so every runner has their own user id. */
+/** The browser client. The runner signs in with an email and password (see /signin and /signup). */
 export function browserClient(): SupabaseClient | null {
   if (!backendOn) return null;
   browser ??= createClient(URL!, ANON!, { auth: { persistSession: true, autoRefreshToken: true } });
   return browser;
 }
 
-/** The runner's access token, signing in first when needed. Null if the backend is off or sign-in fails. */
+/** The signed-in runner's access token, or null when nobody is signed in (or the backend is off). */
 export async function accessToken(): Promise<string | null> {
   const c = browserClient();
   if (!c) return null;
   try {
     const { data } = await c.auth.getSession();
-    if (data.session) return data.session.access_token;
-    const { data: anon, error } = await c.auth.signInAnonymously();
-    return error ? null : (anon.session?.access_token ?? null);
+    return data.session?.access_token ?? null;
   } catch {
     return null;
   }
@@ -40,10 +38,12 @@ export function adminClient(): SupabaseClient | null {
   return URL && key ? createClient(URL, key, { auth: { persistSession: false } }) : null;
 }
 
-/** Reads the runner's user id from a request's "Authorization: Bearer" header. */
-export async function userFrom(req: Request): Promise<{ id: string; token: string } | null> {
+/** The runner behind a request's "Authorization: Bearer" header: a real account with a verified email, or null. */
+export async function userFrom(req: Request): Promise<{ id: string; token: string; email: string } | null> {
   const token = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
   if (!token || !backendOn) return null;
   const { data, error } = await clientFor(token).auth.getUser(token);
-  return error || !data.user ? null : { id: data.user.id, token };
+  const u = data.user;
+  if (error || !u || u.is_anonymous || !u.email || !u.email_confirmed_at) return null;
+  return { id: u.id, token, email: u.email };
 }

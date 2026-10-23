@@ -2,10 +2,12 @@
 
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { CATALOG } from "@/lib/devices/catalog";
+import { callbackDomain, callbackUrl, guideFor, nextStep } from "@/lib/devices/guides";
 import { connectDevice, disconnectDevice, loadDevices, syncDevice, type DeviceInfo } from "@/lib/devices/client";
 import { backendOn } from "@/lib/supabase";
 
 const search = () => window.location.search;
+const origin = () => window.location.origin;
 const noop = () => () => {};
 
 const ERRORS: Record<string, string> = {
@@ -24,6 +26,9 @@ export default function ConnectedDevices() {
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
   const query = useSyncExternalStore(noop, search, () => "");
+  const here = useSyncExternalStore(noop, origin, () => "");
+  const [guide, setGuide] = useState<string | null>(null);
+  const [copied, setCopied] = useState("");
   const fromRedirect = new URLSearchParams(query).get("device_error");
 
   // The server says which bands can be connected and which this runner has connected.
@@ -61,6 +66,14 @@ export default function ConnectedDevices() {
 
   // Every band is listed from the start; the server adds who is connected once it answers.
   const rows: DeviceInfo[] = data?.devices ?? CATALOG.map((c) => ({ ...c, state: c.id === "coros" ? "coming-soon" : "available", connected: false, lastSyncedAt: null }));
+
+  async function copy(text: string) {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(text);
+      setTimeout(() => setCopied(""), 1500);
+    } catch {}
+  }
 
   const pill = "h-10 rounded-full px-4 text-sm font-bold transition disabled:opacity-50";
 
@@ -100,6 +113,12 @@ export default function ConnectedDevices() {
                   Connect
                 </button>
               )}
+              <div className="w-full">
+                <button type="button" aria-expanded={guide === d.id} onClick={() => setGuide(guide === d.id ? null : d.id)} className="text-sm font-bold text-[#2ac4bd] hover:underline">
+                  {guide === d.id ? "Hide steps" : "How to connect"}
+                </button>
+                {guide === d.id && <GuidePanel d={d} here={here} next={nextStep(d, { backendOn, loaded: Boolean(data), serverReady: Boolean(data?.ready) })} copied={copied} onCopy={copy} />}
+              </div>
             </li>
           ))}
         </ul>
@@ -117,5 +136,55 @@ export default function ConnectedDevices() {
         <p className="mt-3 text-xs text-muted">We only read running workouts. You can disconnect at any time, which also asks the band to stop sharing.</p>
       </div>
     </section>
+  );
+}
+
+/** The steps for one band: the next thing to do, what to set up once, and what a runner does. */
+function GuidePanel({ d, here, next, copied, onCopy }: { d: DeviceInfo; here: string; next: string; copied: string; onCopy: (t: string) => void }) {
+  const g = guideFor(d.id, here);
+  const shown = d.id === "strava" ? callbackDomain(here) : callbackUrl(here, d.id);
+  const list = "mt-2 list-decimal space-y-1.5 pl-5 text-sm text-subtext";
+  return (
+    <div className="mt-3 space-y-4 rounded-xl bg-carbon p-4">
+      <div className="rounded-lg border-l-4 border-[#2ac4bd] bg-elevated p-3">
+        <div className="text-xs font-bold uppercase tracking-wider text-muted">Next step</div>
+        <p className="mt-1 text-sm font-semibold text-ink">{next}</p>
+      </div>
+
+      {d.id !== "coros" && here && (
+        <div>
+          <div className="text-xs font-bold uppercase tracking-wider text-muted">{d.id === "strava" ? "Callback address for this app" : "Redirect URL to register"}</div>
+          <div className="mt-1 flex items-center gap-2">
+            <code className="min-w-0 flex-1 break-all rounded-lg bg-elevated px-3 py-2 text-xs text-ink">{shown}</code>
+            <button type="button" onClick={() => onCopy(shown)} className="h-9 shrink-0 rounded-full bg-elevated px-3 text-xs font-bold text-subtext hover:text-ink">
+              {copied === shown ? "Copied" : "Copy"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div>
+        <div className="text-sm font-extrabold">Set up once (the person running the app)</div>
+        <ol className={list}>
+          {g.setup.map((t) => (
+            <li key={t}>{t}</li>
+          ))}
+        </ol>
+        {g.link && (
+          <a href={g.link.href} target="_blank" rel="noreferrer" className="mt-2 inline-block text-sm font-bold text-[#2ac4bd] hover:underline">
+            {g.link.label} ↗
+          </a>
+        )}
+      </div>
+
+      <div>
+        <div className="text-sm font-extrabold">Then, for each runner</div>
+        <ol className={list}>
+          {g.runner.map((t) => (
+            <li key={t}>{t}</li>
+          ))}
+        </ol>
+      </div>
+    </div>
   );
 }
